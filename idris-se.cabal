@@ -1,4 +1,4 @@
-Name:           idris-php
+Name:           idris-se
 Version:        0.0.0.1
 License:        BSD3
 License-file:   CRAPL-LICENSE.txt
@@ -9,7 +9,7 @@ Cabal-Version:  >= 1.8
 Extra-source-files:
 		phprts/*.php
 
-Executable idris-codegen-php
+Executable idris-codegen-se
   Main-is:        Main.hs
   hs-source-dirs: src
 

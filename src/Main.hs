@@ -11,7 +11,7 @@ import IRTS.CodegenPHP
 import System.Environment
 import System.Exit
 
-import Paths_idris_php
+import Paths_idris_se
 
 data Opts = Opts { inputs :: [FilePath],
                    output :: FilePath }
@@ -37,7 +37,7 @@ c_main opts = do elabPrims
 
 main :: IO ()
 main = do opts <- getOpts
-          if (null (inputs opts)) 
+          if (null (inputs opts))
              then showUsage
              else runMain (c_main opts)
 
