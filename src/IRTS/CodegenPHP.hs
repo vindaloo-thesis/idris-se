@@ -44,7 +44,7 @@ cgExport (Export _ffiName _fileName es) = [""]
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
     = "def " ++ phpname n ++ "("
-                  ++ showSep ", " (map (loc . fst) (zip [0..] args)) ++ "):\n"
+                  ++ showSep ", " (map (loc . fst) (zip [0..] args)) ++ "): #"++ showCG n ++"\n"
                   ++ cgBody 2 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
         doRet ind str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
@@ -54,7 +54,7 @@ etherApp (NS (UN (t)) _) args = eApp (str t) args where
   eApp "save" _ = "\n"
   eApp "balance" _ = "s.block.balance(" ++ args !! 4 ++ ")\n"
   eApp "contractAddress" _ = "self\n"
-  --eApp "sender" _ = "msg.sender"
+  eApp "sender" _ = "msg.sender"
   eApp "send" _ = "send(" ++ (args !! 4) ++ ", " ++ (args !! 5) ++ ")\n"
   eApp f  args = "UNHANDLED EVM FUNCTION " ++ f ++ "(" ++ showSep ", " args ++ ")\n"
 
@@ -87,7 +87,7 @@ cgBody ind ret (SCon _ t n args)
 cgBody ind ret (SCase _ e alts) = cgBody ind ret (SChkCase e alts)
 cgBody ind ret (SChkCase e (a:alts))
    = let scr = cgVar e
-         scrvar = if any conCase alts then scr ++ "[0]" else scr in
+         scrvar = if any conCase alts || conCase a then scr ++ "[0]" else scr in
          (cgAlt ind ret scr scrvar "if" a) ++ showSep "\n" (map (cgAlt ind ret scr scrvar "elif") alts) ++ "\n"
   where conCase (SConCase _ _ _ _ _) = True
         conCase _ = False
