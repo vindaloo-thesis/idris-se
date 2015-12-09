@@ -7,6 +7,7 @@ import Idris.Core.TT
 
 import Data.Maybe
 import Data.Char
+import Data.List
 
 codegenPHP :: CodeGenerator
 codegenPHP ci = do let out = concatMap doCodegen (simpleDecls ci)
@@ -41,18 +42,24 @@ doCodegen (n, SFun _ args i def) = cgFun n args def
 cgExport :: ExportIFace -> [String]
 cgExport (Export _ffiName _fileName es) = [""]
 
+shouldSkip :: Name -> Bool
+--shouldSkip (NS n ns) =  --any (\x -> str x == "Prelude" || str x == "Ethereum") ns
+shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
+
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
-    = "def " ++ phpname n ++ "("
-                  ++ showSep ", " (map (loc . fst) (zip [0..] args)) ++ "): #"++ showCG n ++"\n"
-                  ++ cgBody 2 doRet def ++ "\n\n"
+  | shouldSkip n = "#"++ showCG n ++"\n"
+  | otherwise    = "def " ++ phpname n ++ "("
+                    ++ showSep ", " (map (loc . fst) (zip [0..] args)) ++ "): #"++ showCG n ++"\n"
+                    ++ cgBody 2 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
         doRet ind str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
 
 etherApp :: Name -> [String] -> String
 etherApp (NS (UN (t)) _) args = eApp (str t) args where
   eApp "save" _ = "\n"
-  eApp "balance" _ = "s.block.balance(" ++ args !! 4 ++ ")\n"
+  --eApp "balance" _ = "self.s.block.balance(" ++ args !! 4 ++ ")\n"
+  eApp "balance" _ = args !! 4 ++ ".balance\n"
   eApp "contractAddress" _ = "self\n"
   eApp "sender" _ = "msg.sender"
   eApp "send" _ = "send(" ++ (args !! 4) ++ ", " ++ (args !! 5) ++ ")\n"
@@ -72,7 +79,9 @@ isEthereumPrim n         = False
 cgBody :: Int -> (Int -> String -> String) -> SExp -> String
 cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ phpname n ++ "()")
 cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
-cgBody ind ret (SApp _ f args) = indent ind ++ ret ind ("self." ++ phpname f ++ "(" ++
+cgBody ind ret (SApp _ f args)
+  | isEthereumPrim f = indent ind ++ ret ind (etherApp f (map cgVar args))
+  | otherwise        = indent ind ++ ret ind ("self." ++ phpname f ++ "(" ++
                                    showSep ", " (map cgVar args) ++ ")")
 cgBody ind ret (SLet (Loc i) v sc)
    = cgBody ind (\_ x -> loc i ++ " = " ++ x ++ "\n") v ++
