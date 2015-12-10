@@ -1,7 +1,7 @@
 module GeneralStore
 
 import Effects
---import Effect.StdIO
+import Ethereum.IO
 import Data.Vect
 import Data.HVect
 import Types
@@ -50,6 +50,15 @@ instance Handler Store IO where
       writeFile (show field) (serialize field val)
       k () s
 
+instance Handler Store PIO where
+  handle s (Read field)      k = do
+      val <- 
+      putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
+      k val s
+  handle s (Write field val) k = do
+      writeFile (show field) (serialize field val)
+      putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
+      k () s
 
 
 
