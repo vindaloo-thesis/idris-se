@@ -13,8 +13,9 @@ codegenPHP :: CodeGenerator
 codegenPHP ci = do let out = concatMap doCodegen (simpleDecls ci)
                        exports = concat (concatMap cgExport (exportDecls ci))
                    writeFile (outputFile ci) ("\n" ++ helpers ++ "\n" ++
-                                                        out ++ "\n" ++
-                                                        exports ++ "\n" ++
+                                                        out ++ "\n#exports:\n" ++
+                                                        exports ++ "\n#/exports" ++
+                                                        show (length (exportDecls ci)) ++
                                                         start ++ "\n" ++
                                               "\n\n")
 
@@ -39,8 +40,35 @@ indent ind = take (ind*2) $ repeat ' '
 doCodegen :: (Name, SDecl) -> String
 doCodegen (n, SFun _ args i def) = cgFun n args def
 
+--EXPORTS START
 cgExport :: ExportIFace -> [String]
-cgExport (Export _ffiName _fileName es) = [""]
+cgExport (Export _ffiName _fileName es) = ["CGEXPORT", _fileName, show  $ length es] ++ map cgExportDecl es
+
+cgExportDecl :: Export -> String
+cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys)
+    = cgExportFun fn en (length argTys)
+cgExportDecl _ = "#ignored"  -- ignore everything else
+-- Example: ExportFun Main.exports, greet (FStr "greet") (FIO (FCon PyUnit)) []
+
+cgExportFun :: Name -> String -> Int -> String
+cgExportFun fn en argCnt
+    = ("#export: " ++ show fn)
+    {-
+    $+$ text "def" <+> cgApp (text en) (map text args) <> colon
+    $+$ indent (
+        cgApp
+            (cgName (sMN 0 "APPLY"))
+            [ cgApp (cgName fn)
+                $ map text args
+            , text "World"
+            ]
+    )
+    $+$ text ""
+  where
+    args = ["arg" ++ show i | i <- [1..argCnt]]
+    -}
+
+--EXPORTS END
 
 shouldSkip :: Name -> Bool
 --shouldSkip (NS n ns) =  --any (\x -> str x == "Prelude" || str x == "Ethereum") ns
