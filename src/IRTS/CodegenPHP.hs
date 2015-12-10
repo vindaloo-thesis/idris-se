@@ -42,12 +42,12 @@ doCodegen (n, SFun _ args i def) = cgFun n args def
 
 --EXPORTS START
 cgExport :: ExportIFace -> [String]
-cgExport (Export _ffiName _fileName es) = ["CGEXPORT", _fileName, show  $ length es] ++ map cgExportDecl es
+cgExport (Export _ffiName _fileName es) = map cgExportDecl es
 
 cgExportDecl :: Export -> String
 cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys)
     = cgExportFun fn en (length argTys)
-cgExportDecl _ = "#ignored"  -- ignore everything else
+cgExportDecl _ = ""  -- ignore everything else. Like Data.
 -- Example: ExportFun Main.exports, greet (FStr "greet") (FIO (FCon PyUnit)) []
 
 cgExportFun :: Name -> String -> Int -> String
@@ -85,7 +85,7 @@ cgFun n args def
 
 etherApp :: Name -> [String] -> String
 etherApp (NS (UN (t)) _) args = eApp (str t) args where
-  eApp "save" _ = "\n"
+  eApp "save" _ = "0 #save "++ head args ++ "\n"
   --eApp "balance" _ = "self.s.block.balance(" ++ args !! 4 ++ ")\n"
   eApp "balance" _ = args !! 4 ++ ".balance\n"
   eApp "contractAddress" _ = "self\n"
@@ -143,7 +143,7 @@ cgAlt ind ret scr scrvar f (SDefaultCase exp)
 cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
    = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n"
              ++ project 1 lv args ++ "\n" ++ cgBody (ind+1) ret exp)
-   where project i v [] = ""
+   where project i v [] = "#empty project"
          project i v (n : ns) = indent (ind+1) ++ (loc v ++ " = " ++ scr ++ "[" ++ show i ++ "]\n"
                                   ++ project (i + 1) (v + 1) ns)
 
