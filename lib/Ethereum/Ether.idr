@@ -1,4 +1,4 @@
-module Effects.Ethereum
+module Effects.Ether
 
 import Effects
 import Data.Fin
@@ -21,42 +21,42 @@ Init v = Running v 0 0
 Finished : {v : Nat} -> Nat -> Nat -> CState
 Finished {v} t s = Running v t s
 
-data Ethereum : CState -> Type where
-  MkS : (value: Nat) -> (trans: Nat) -> (saved: Nat) -> Ethereum (Running value trans saved)
+data Ether : CState -> Type where
+  MkS : (value: Nat) -> (trans: Nat) -> (saved: Nat) -> Ether (Running value trans saved)
 
 instance Default CState where
   default = Init 1
 
-instance Default (Ethereum (Running v 0 0)) where
+instance Default (Ether (Running v 0 0)) where
   default {v} = MkS v 0 0 
 
 --TODO: Can we remove Finish here and just use Running?
-data EthereumRules : Effect where
-  ContractAddress : sig EthereumRules Address
-                    (Ethereum (Running v t s))
-  Value   : sig EthereumRules Nat
-            (Ethereum (Running v t s))
-  Balance : Address -> sig EthereumRules Nat
-            (Ethereum (Running v t s))
-  Sender   : sig EthereumRules Address
-            (Ethereum (Running v t s))
+data EtherRules : Effect where
+  ContractAddress : sig EtherRules Address
+                    (Ether (Running v t s))
+  Value   : sig EtherRules Nat
+            (Ether (Running v t s))
+  Balance : Address -> sig EtherRules Nat
+            (Ether (Running v t s))
+  Sender   : sig EtherRules Address
+            (Ether (Running v t s))
   Save    : (a : Nat) -> 
-            sig EthereumRules ()
-            (Ethereum (Running v t s))
-            (Ethereum (Running v t (s+a)))
+            sig EtherRules ()
+            (Ether (Running v t s))
+            (Ether (Running v t (s+a)))
   Send    : (a : Nat) ->
             (r : Address) ->
-            sig EthereumRules ()
-            (Ethereum (Running v t s))
-            (Ethereum (Running v (t+a) s))
+            sig EtherRules ()
+            (Ether (Running v t s))
+            (Ether (Running v (t+a) s))
 
-ETHEREUM : CState -> EFFECT
-ETHEREUM h = MkEff (Ethereum h) EthereumRules
+ETH : CState -> EFFECT
+ETH h = MkEff (Ether h) EtherRules
 
 Contract : (x : Type) -> (ce : x -> List EFFECT) -> Type
-Contract x ce = {m : Type -> Type} -> {v : Nat} -> EffM m x [ETHEREUM (Init v)] ce
+Contract x ce = {m : Type -> Type} -> {v : Nat} -> EffM m x [ETH (Init v)] ce
 
-instance Handler EthereumRules IO where
+instance Handler EtherRules IO where
   handle (MkS v t s) Value    k = k v (MkS v t s)
 
   handle (MkS v t s) ContractAddress k = k 0x00000000000000000000000000000000deadbeef (MkS v t s)
@@ -73,34 +73,34 @@ instance Handler EthereumRules IO where
 
 
 ETH_IN : Nat -> EFFECT
-ETH_IN v = ETHEREUM (Init v)
+ETH_IN v = ETH (Init v)
 
 ETH_OUT : Nat -> Nat -> Nat -> EFFECT
-ETH_OUT v t s = ETHEREUM (Finished {v} t s)
+ETH_OUT v t s = ETH (Finished {v} t s)
 
 contractAddress : Eff Address
-       [ETHEREUM (Running v t s)]
+       [ETH (Running v t s)]
 contractAddress = call $ ContractAddress
 
 sender : Eff Address
-       [ETHEREUM (Running v t s)]
+       [ETH (Running v t s)]
 sender = call $ Sender
 
 value : Eff Nat
-       [ETHEREUM (Running v t s)]
+       [ETH (Running v t s)]
 value = call $ Value
 
 balance : Address -> Eff Nat
-       [ETHEREUM (Running v t s)]
+       [ETH (Running v t s)]
 balance a = call $ (Balance a)
 
 save : (a : Nat) -> Eff ()
-       [ETHEREUM (Running v t s)]
-       [ETHEREUM (Running v t (s+a))]
+       [ETH (Running v t s)]
+       [ETH (Running v t (s+a))]
 save a = call $ Save a
 
 send : (a : Nat) -> (r : Address) -> Eff ()
-       [ETHEREUM (Running v t s)]
-       [ETHEREUM (Running v (t+a) s)]
+       [ETH (Running v t s)]
+       [ETH (Running v (t+a) s)]
 send a r = call $ Send a r
 
