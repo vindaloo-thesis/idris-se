@@ -1,7 +1,7 @@
 module Ethereum.SIO
 
 --import Python.Objects
-import Types
+import Ethereum.Types
 
 %default total
 %access public
@@ -22,6 +22,7 @@ data SeTypes : Type -> Type where
   SeString_io  : SeTypes String
 --
 --  -- Other types
+  SeUnit_io    : SeTypes ()
 --  PyUnit_io  : PyTypes ()
 --  PyPair_io  : PyTypes a -> PyTypes b -> PyTypes (a, b)
 --  PyList_io  : PyTypes a -> PyTypes (List a)
