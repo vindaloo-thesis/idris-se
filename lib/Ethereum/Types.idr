@@ -4,6 +4,8 @@ import Data.Vect
 import Data.HVect
 import Data.Vect.Quantifiers
 
+%default total
+
 -- Missing head, tail function for HVect
 head : HVect (t::ts) -> t
 head (x::_) = x
