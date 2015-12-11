@@ -45,6 +45,8 @@ FFI_Se = MkFFI SeTypes String String
 SIO : Type -> Type
 SIO = IO' FFI_Se
 
+-- I don't know if the 'balance' function actually exists (as opposed to contract.balance),
+-- but can't find any good info...
 balance : Address -> SIO Nat
 balance a = toNat <$> foreign FFI_Se "balance" (Int -> SIO Int) a
 
