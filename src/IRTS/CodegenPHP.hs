@@ -73,7 +73,7 @@ cgExportFun fn en argCnt
 shouldSkip :: Name -> Bool
 shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
   -- Skipped namespaces
-  "__prim", "prim", "Ether"
+  "__prim", "prim" --, "Ether"
   ]) ns || elem (showCG n) [
   -- Skipped functions
   "Prelude.Bool.&&",
@@ -103,7 +103,7 @@ cgFun n args def
 
 etherApp :: Name -> [String] -> String
 etherApp (NS (UN (t)) _) args = eApp (str t) args where
-  eApp "save" _ = "0 #save "++ head args ++ "\n"
+  eApp "save" _ = "[2,[0],[4]] #save "++ head args ++ "\n"
   --eApp "balance" _ = "self.s.block.balance(" ++ args !! 4 ++ ")\n"
   eApp "balance" _ = args !! 4 ++ ".balance\n"
   eApp "contractAddress" _ = "self\n"
