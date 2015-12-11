@@ -1,4 +1,4 @@
-module Types
+module Ethereum.Types
 
 import Data.Vect
 import Data.HVect

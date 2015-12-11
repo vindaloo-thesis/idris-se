@@ -1,13 +1,16 @@
 module Ethereum.SIO
 
 --import Python.Objects
-import Ethereum.Types
+import Types
 
 %default total
 %access public
 
 --unRaw : FFI_C.Raw a -> a
 --unRaw (MkRaw x) = x
+
+Address : Type
+Address = Int
 
 ||| Supported Python foreign types.
 data SeTypes : Type -> Type where
@@ -44,6 +47,16 @@ FFI_Se = MkFFI SeTypes String String
 ||| Serpent IO.
 SIO : Type -> Type
 SIO = IO' FFI_Se
+
+balance : Address -> SIO Nat
+balance a = toNat <$> foreign FFI_Se "balance" (Int -> SIO Int) a
+
+sender : SIO Address
+sender = foreign FFI_Se "msg.sender" (SIO Int)
+
+--se_read : (f : Field) -> SIO (InterpField f)
+--se_read f = foreign FFI_Se "readVal" (VarName -> SIO (InterpField f)) (name f)
+
 
 readInt : (f : Field) -> SIO (Int)
 readInt f = foreign FFI_Se "readVal" (VarName -> SIO (Int)) (name f)

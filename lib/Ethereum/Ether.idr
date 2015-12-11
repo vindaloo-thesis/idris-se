@@ -12,7 +12,7 @@ import Ethereum.SIO
 data Commit a = Comm a
 
 Address : Type
-Address = Integer
+Address = Int
 
 -------------- EFFECT --------------
 data CState = NotRunning | Running Nat Nat Nat
