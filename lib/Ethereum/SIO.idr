@@ -6,8 +6,8 @@ import Ethereum.Types
 %default total
 %access public
 
---unRaw : FFI_C.Raw a -> a
---unRaw (MkRaw x) = x
+unRaw : FFI_C.Raw a -> a
+unRaw (MkRaw x) = x
 
 ||| Supported Python foreign types.
 data SeTypes : Type -> Type where
@@ -33,7 +33,7 @@ data SeTypes : Type -> Type where
 --  PyPtr_io       : PyTypes Ptr
 --
 --  ||| Arbitrary Idris objects, opaque to Python.
---  PyAny_io : PyTypes (FFI_C.Raw a)
+  SeAny_io : SeTypes (FFI_C.Raw a)
 --
 --  ||| Python objects with a signature known to Idris.
 --  PyObj_io : PyTypes (Obj sig)
@@ -53,8 +53,8 @@ balance a = toNat <$> foreign FFI_Se "balance" (Int -> SIO Int) a
 sender : SIO Address
 sender = foreign FFI_Se "msg.sender" (SIO Int)
 
---se_read : (f : Field) -> SIO (InterpField f)
---se_read f = foreign FFI_Se "readVal" (VarName -> SIO (InterpField f)) (name f)
+se_read : (f : Field) -> SIO (InterpField f)
+se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
 
 
 readInt : (f : Field) -> SIO (Int)

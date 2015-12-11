@@ -1,4 +1,4 @@
-module Ether
+module Ethereum.Ether
 
 import Effects
 import Data.Fin
