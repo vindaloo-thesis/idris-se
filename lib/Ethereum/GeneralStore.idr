@@ -1,10 +1,10 @@
 module GeneralStore
 
-import Effects
-import Ethereum.IO
 import Data.Vect
 import Data.HVect
-import Types
+import Effects
+import Ethereum.IO
+import Ethereum.Types
 
 
 data Store : Effect where

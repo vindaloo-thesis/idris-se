@@ -17,6 +17,9 @@ tail (_::xs) = xs
 VarName : Type
 VarName = String
 
+Address : Type
+Address = Int
+
 -- TODO: Lists, maps
 -- parameter: index
 data Field = EInt VarName --| EString String | EAddress Nat -- | EArray Nat Nat Field

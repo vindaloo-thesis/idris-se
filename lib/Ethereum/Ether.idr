@@ -7,12 +7,10 @@ import Effect.StdIO
 import Effect.Exception
 import Control.IOExcept
 import Ethereum.SIO
+import Ethereum.Types
 
 ------------ TYPES -----------------
 data Commit a = Comm a
-
-Address : Type
-Address = Int
 
 -------------- EFFECT --------------
 data CState = NotRunning | Running Nat Nat Nat

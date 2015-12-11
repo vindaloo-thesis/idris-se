@@ -1,16 +1,13 @@
 module Ethereum.SIO
 
 --import Python.Objects
-import Types
+import Ethereum.Types
 
 %default total
 %access public
 
 --unRaw : FFI_C.Raw a -> a
 --unRaw (MkRaw x) = x
-
-Address : Type
-Address = Int
 
 ||| Supported Python foreign types.
 data SeTypes : Type -> Type where
