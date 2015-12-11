@@ -56,7 +56,11 @@ sender = foreign FFI_Se "msg.sender" (SIO Int)
 
 --se_read : (f : Field) -> SIO (InterpField f)
 --se_read f = foreign FFI_Se "readVal" (VarName -> SIO (InterpField f)) (name f)
---
---se_write : (f : Field) -> (InterpField f) -> SIO ()
---se_write f val = foreign FFI_Se "writeVal" (VarName -> InterpField f -> SIO ()) (name f) val
+
+
+readInt : (f : Field) -> SIO (Int)
+readInt f = foreign FFI_Se "readVal" (VarName -> SIO (Int)) (name f)
+
+se_write : (f : Field) -> (InterpField f) -> SIO ()
+se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
 
