@@ -71,7 +71,25 @@ cgExportFun fn en argCnt
 --EXPORTS END
 
 shouldSkip :: Name -> Bool
---shouldSkip (NS n ns) =  --any (\x -> str x == "Prelude" || str x == "Ethereum") ns
+shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
+  -- Skipped namespaces
+  "__prim", "prim", "Ether"
+  ]) ns || elem (showCG n) [
+  -- Skipped functions
+  "Prelude.Bool.&&",
+  "call__IO",
+  "Prelude.Bool.ifThenElse",
+  "Prelude.Classes.intToBool",
+  "mkForeignPrim",
+  "Force",
+  "Void_case",
+  "Void_elim"
+  ]
+shouldSkip (SN n) = True --not $ elem (str n) [
+shouldSkip (UN n) = not $ elem (str n) [
+  --Included "special" (really user defined) functions
+  "io_return"
+  ]
 shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
 cgFun :: Name -> [Name] -> SExp -> String
@@ -94,7 +112,7 @@ etherApp (NS (UN (t)) _) args = eApp (str t) args where
   eApp f  args = "UNHANDLED EVM FUNCTION " ++ f ++ "(" ++ showSep ", " args ++ ")\n"
 
 isEthereumPrim :: Name -> Bool
-isEthereumPrim (NS f ns) = any (\x -> str x == "Ethereum") ns
+isEthereumPrim (NS f ns) = any (\x -> str x == "Ether") ns
 isEthereumPrim n         = False
 
 -- cgBody converts the SExp into a chunk of php which calculates the result
@@ -143,7 +161,7 @@ cgAlt ind ret scr scrvar f (SDefaultCase exp)
 cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
    = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n"
              ++ project 1 lv args ++ "\n" ++ cgBody (ind+1) ret exp)
-   where project i v [] = "#empty project"
+   where project i v [] = indent (ind+1) ++ "#empty project"
          project i v (n : ns) = indent (ind+1) ++ (loc v ++ " = " ++ scr ++ "[" ++ show i ++ "]\n"
                                   ++ project (i + 1) (v + 1) ns)
 
