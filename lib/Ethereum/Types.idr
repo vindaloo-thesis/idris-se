@@ -5,6 +5,7 @@ import Data.HVect
 import Data.Vect.Quantifiers
 
 %default total
+%access public
 
 -- Missing head, tail function for HVect
 head : HVect (t::ts) -> t

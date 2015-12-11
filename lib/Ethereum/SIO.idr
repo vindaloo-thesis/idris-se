@@ -1,7 +1,7 @@
 module Ethereum.SIO
 
 --import Python.Objects
-import Types
+import Ethereum.Types
 
 %default total
 %access public
@@ -22,6 +22,7 @@ data SeTypes : Type -> Type where
   SeString_io  : SeTypes String
 --
 --  -- Other types
+  SeUnit_io    : SeTypes ()
 --  PyUnit_io  : PyTypes ()
 --  PyPair_io  : PyTypes a -> PyTypes b -> PyTypes (a, b)
 --  PyList_io  : PyTypes a -> PyTypes (List a)
@@ -47,6 +48,6 @@ SIO = IO' FFI_Se
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = foreign FFI_Se "readVal" (VarName -> SIO (InterpField f)) (name f)
 
---se_write : (f : Field) -> (InterpField f) -> SIO ()
---se_write f val = foreign FFI_Se "writeVal" (VarName -> InterpField f -> SIO ()) (name f) val
+se_write : (f : Field) -> (InterpField f) -> SIO ()
+se_write f val = foreign FFI_Se "writeVal" (VarName -> InterpField f -> SIO ()) (name f) val
 
