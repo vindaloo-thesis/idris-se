@@ -1,15 +1,17 @@
-module Python
+module Ethereum
 
-import public Python.Telescope
-import public Python.Objects
-import public Python.IO
-import public Python.Fields
-import public Python.Functions
-import public Python.Exceptions
+--import public Ethereum.Telescope
+--import public Ethereum.Objects
+import public Ethereum.SIO
+--import public Ethereum.Fields
+--import public Ethereum.Functions
+--import public Ethereum.Exceptions
+import public Ethereum.GeneralStore
+import public Ethereum.Ether
 
 %default total
 %access public
-
+{-
 ||| Import a Python module. This is a low-level function
 ||| since the correctness of signatures cannot be checked.
 |||
@@ -35,3 +37,4 @@ getGlobal : (name : String) -> Obj sig
 getGlobal {sig=sig} name =
   unsafePerformIO $
     foreign FFI_Py "_idris_get_global" (String -> PIO (Obj sig)) name
+-}

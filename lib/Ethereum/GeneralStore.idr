@@ -3,7 +3,7 @@ module Ethereum.GeneralStore
 import Data.Vect
 import Data.HVect
 import Effects
-import Ethereum.IO
+import Ethereum.SIO
 import Ethereum.Types
 
 
