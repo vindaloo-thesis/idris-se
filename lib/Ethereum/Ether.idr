@@ -76,18 +76,23 @@ instance Handler EtherRules SIO where
 
   handle (MkS v t s) ContractAddress k = k 0x00000000000000000000000000000000deadbeef (MkS v t s)
 
-  handle (MkS v t s) (Balance a) k = k 100 (MkS v t s) -- TODO: Change this. Balance should be *read*.
+  handle state (Balance a) k = do
+    --bal <- balance a
+    --k bal state
+    k 100 state -- TODO: Change this. Balance should be *read*.
 
   handle (MkS v t s) (Save a) k = do --putStrLn $ "- Saved " ++ show a
                                      k () (MkS v t (s+a))
 
-  handle (MkS v t s) (Send a r) k = do --putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
-                                       k () (MkS v (t+a) s)
+  handle (MkS v t s) (Send a r) k = do
+    --putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
+    send r a
+    k () (MkS v (t+a) s)
 
-  handle (MkS v t s) Sender k   = do
-    --s <- sender
-    --k s (MkS v t s)
-    k 0x00cf7667b8dd4ece1728ef7809bc844a1356aadf (MkS v t s)
+  handle state Sender k   = do
+    s <- sender
+    k s state
+    --k 0x00cf7667b8dd4ece1728ef7809bc844a1356aadf state
 ETH_IN : Nat -> EFFECT
 ETH_IN v = ETH (Init v)
 

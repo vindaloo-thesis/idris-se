@@ -107,8 +107,8 @@ etherApp (NS (UN (t)) _) args = eApp (str t) args where
   --eApp "balance" _ = "self.s.block.balance(" ++ args !! 4 ++ ")\n"
   eApp "balance" _ = args !! 4 ++ ".balance\n"
   eApp "contractAddress" _ = "self\n"
-  eApp "sender" _ = "msg.sender"
-  eApp "send" _ = "send(" ++ (args !! 4) ++ ", " ++ (args !! 5) ++ ")\n"
+  --eApp "sender" _ = "msg.sender"
+  --eApp "send" _ = "send(" ++ (args !! 4) ++ ", " ++ (args !! 5) ++ ")\n"
   eApp f  args = "UNHANDLED EVM FUNCTION " ++ f ++ "(" ++ showSep ", " args ++ ")\n"
 
 isEthereumPrim :: Name -> Bool
@@ -150,8 +150,16 @@ cgBody ind ret (SConst c) = indent ind ++ (ret ind $ cgConst c)
 cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
 cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
 cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
-cgBody ind ret _ = indent ind ++ (ret ind $ "error(\"NOT IMPLEMENTED!!!!\")")
+cgBody ind ret (SForeign _ desc args) = indent ind ++ (ret ind $ cgFDesc desc ++ cgFArgs args)
 
+
+cgFDesc :: FDesc -> String
+cgFDesc (FStr n) = n
+cgFDesc fdesc    = show fdesc
+
+cgFArgs :: [(FDesc,LVar)] -> String
+cgFArgs []   = ""
+cgFArgs args = "(" ++ intercalate "," (map (cgVar . snd) args) ++ ")"
 
 cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
 cgAlt ind ret scr scrvar f (SConstCase t exp)

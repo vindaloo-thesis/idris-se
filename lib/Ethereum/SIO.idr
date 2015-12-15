@@ -47,11 +47,14 @@ SIO = IO' FFI_Se
 
 -- I don't know if the 'balance' function actually exists (as opposed to contract.balance),
 -- but can't find any good info...
-balance : Address -> SIO Nat
-balance a = toNat <$> foreign FFI_Se "balance" (Int -> SIO Int) a
+--balance : Address -> SIO Nat
+--balance a = toNat <$> foreign FFI_Se (show a ++ ".balance") (Int -> SIO Int) a
 
 sender : SIO Address
 sender = foreign FFI_Se "msg.sender" (SIO Int)
+
+send : Address -> Nat -> SIO ()
+send a n = foreign FFI_Se "send" (Address -> Int -> SIO ()) a (toIntNat n)
 
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
