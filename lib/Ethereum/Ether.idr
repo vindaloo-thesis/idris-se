@@ -84,7 +84,10 @@ instance Handler EtherRules SIO where
   handle (MkS v t s) (Send a r) k = do --putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
                                        k () (MkS v (t+a) s)
 
-  handle (MkS v t s) Sender k   = k 0x00cf7667b8dd4ece1728ef7809bc844a1356aadf (MkS v t s)
+  handle (MkS v t s) Sender k   = do
+    s <- sender
+    k s (MkS v t s)
+    --k 0x00cf7667b8dd4ece1728ef7809bc844a1356aadf (MkS v t s)
 ETH_IN : Nat -> EFFECT
 ETH_IN v = ETH (Init v)
 
