@@ -155,7 +155,7 @@ cgBody ind ret (SForeign _ desc args) = indent ind ++ (ret ind $ cgFDesc desc ++
 
 cgFDesc :: FDesc -> String
 cgFDesc (FStr n) = n
-cgFDesc fdesc    = show fdesc
+cgFDesc fdesc    = "ERROR!!! UNIMPLEMENTED CASE OF cgFDesc: " ++ show fdesc
 
 cgFArgs :: [(FDesc,LVar)] -> String
 cgFArgs []   = ""
