@@ -38,6 +38,7 @@ serialize (EArray _ l t) xs = "[" ++ serialize' "" xs ++ "]" where
 -}
 
 -- TODO: Error handler for when files don't exist etc
+{-
 instance Handler Store IO where
   handle s (Read field)     k =
     do
@@ -49,6 +50,7 @@ instance Handler Store IO where
       putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
       writeFile (show field) (serialize field val)
       k () s
+      -}
 
 instance Handler Store SIO where
   handle s (Read field)      k = do
