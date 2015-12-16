@@ -5,3 +5,5 @@ modules = Ethereum
 	, Ethereum.Types
 	, Ethereum.GeneralStore
 	, Ethereum.Ether
+
+opts = "-p effects"
