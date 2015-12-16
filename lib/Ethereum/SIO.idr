@@ -45,16 +45,20 @@ FFI_Se = MkFFI SeTypes String String
 SIO : Type -> Type
 SIO = IO' FFI_Se
 
--- I don't know if the 'balance' function actually exists (as opposed to contract.balance),
--- but can't find any good info...
---balance : Address -> SIO Nat
---balance a = toNat <$> foreign FFI_Se (show a ++ ".balance") (Int -> SIO Int) a
+balance : Address -> SIO Int
+balance a = foreign FFI_Se "getBalance" (Address -> SIO Int) a
 
 sender : SIO Address
 sender = foreign FFI_Se "msg.sender" (SIO Int)
 
 send : Address -> Nat -> SIO ()
 send a n = foreign FFI_Se "send" (Address -> Int -> SIO ()) a (toIntNat n)
+
+contractAddress : SIO Address
+contractAddress = foreign FFI_Se "self" (SIO Address)
+
+remainingGas : SIO Nat
+remainingGas = toNat <$> foreign FFI_Se "msg.gas" (SIO Int)
 
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)

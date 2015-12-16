@@ -103,10 +103,10 @@ cgFun n args def
 
 etherApp :: Name -> [String] -> String
 etherApp (NS (UN (t)) _) args = eApp (str t) args where
-  eApp "save" _ = "[2,[0],[4]] #save "++ head args ++ "\n"
+  --eApp "save" _ = "[2,[0],[4]] #save "++ head args ++ "\n"
   --eApp "balance" _ = "self.s.block.balance(" ++ args !! 4 ++ ")\n"
-  eApp "balance" _ = args !! 4 ++ ".balance\n"
-  eApp "contractAddress" _ = "self\n"
+  --eApp "balance" _ = args !! 4 ++ ".balance\n"
+  --eApp "contractAddress" _ = "self\n"
   --eApp "sender" _ = "msg.sender"
   --eApp "send" _ = "send(" ++ (args !! 4) ++ ", " ++ (args !! 5) ++ ")\n"
   eApp f  args = "UNHANDLED EVM FUNCTION " ++ f ++ "(" ++ showSep ", " args ++ ")\n"
@@ -126,7 +126,7 @@ cgBody :: Int -> (Int -> String -> String) -> SExp -> String
 cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ phpname n ++ "()")
 cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
 cgBody ind ret (SApp _ f args)
-  | isEthereumPrim f = indent ind ++ ret ind (etherApp f (map cgVar args))
+--  | isEthereumPrim f = indent ind ++ ret ind (etherApp f (map cgVar args))
   | otherwise        = indent ind ++ ret ind ("self." ++ phpname f ++ "(" ++
                                    showSep ", " (map cgVar args) ++ ")")
 cgBody ind ret (SLet (Loc i) v sc)
@@ -150,16 +150,26 @@ cgBody ind ret (SConst c) = indent ind ++ (ret ind $ cgConst c)
 cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
 cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
 cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
-cgBody ind ret (SForeign _ desc args) = indent ind ++ (ret ind $ cgFDesc desc ++ cgFArgs args)
+cgBody ind ret (SForeign desc1 desc2 args) = indent ind ++ cgFDesc ind ret desc1 desc2 args
 
 
-cgFDesc :: FDesc -> String
-cgFDesc (FStr n) = n
-cgFDesc fdesc    = "ERROR!!! UNIMPLEMENTED CASE OF cgFDesc: " ++ show fdesc
+cgFDesc :: Int -> (Int -> String -> String) -> FDesc -> FDesc -> [(FDesc,LVar)] -> String
+cgFDesc ind ret _ (FStr n) args = case n of
+                                    "writeVal"   -> cgVarWrite args
+                                    "readVal"    -> ret ind $ cgVarRead args
+                                    "getBalance" -> ret ind $ (cgVar . snd . head $ args) ++ ".balance"
+                                    _            -> ret ind $ n ++ cgFArgs args
+cgFDesc ind _   _ fdesc    _    = "ERROR!!! UNIMPLEMENTED CASE OF cgFDesc: " ++ show fdesc
 
 cgFArgs :: [(FDesc,LVar)] -> String
 cgFArgs []   = ""
 cgFArgs args = "(" ++ intercalate "," (map (cgVar . snd) args) ++ ")"
+
+cgVarRead :: [(FDesc,LVar)] -> String
+cgVarRead [(_,var)] = cgVar var
+
+cgVarWrite :: [(FDesc,LVar)] -> String
+cgVarWrite [(_,var),(_,val)] = cgVar var ++ " = " ++ cgVar val
 
 cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
 cgAlt ind ret scr scrvar f (SConstCase t exp)
