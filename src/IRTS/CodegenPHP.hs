@@ -166,10 +166,12 @@ cgFArgs []   = ""
 cgFArgs args = "(" ++ intercalate "," (map (cgVar . snd) args) ++ ")"
 
 cgVarRead :: [(FDesc,LVar)] -> String
-cgVarRead [(_,var)] = cgVar var
+cgVarRead [(_,var)] = "self.storage[" ++ cgVar var ++ "]"
+cgVarRead args      = "ERROR: missing case in cgVarRead" ++ show args
 
 cgVarWrite :: [(FDesc,LVar)] -> String
-cgVarWrite [(_,var),(_,val)] = cgVar var ++ " = " ++ cgVar val
+cgVarWrite [(_,var),(_,val)] = "self.storage[" ++ cgVar var ++ "] = " ++ cgVar val
+cgVarWrite args              = "ERROR: missing case in cgVarWrite" ++ show args 
 
 cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
 cgAlt ind ret scr scrvar f (SConstCase t exp)
