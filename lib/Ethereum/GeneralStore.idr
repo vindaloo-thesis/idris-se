@@ -20,6 +20,9 @@ read f = call $ GeneralStore.Read f
 write : (f : Field) -> (InterpField f) -> Eff () [STORE]
 write f x = call (Write f x)
 
+update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
+update f fun = write f (fun !(read f))
+
 deserialize : (f : Field) -> String -> InterpField f
 deserialize (EInt _)  = prim__fromStrInt 
 --deserialize (EString _) = id
