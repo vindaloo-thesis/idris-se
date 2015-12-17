@@ -69,82 +69,42 @@ def idris_Effects_46_dropEnv(loc0, loc1, loc2, loc3, loc4): #Effects.dropEnv
 def idris_Effects_46_eff(loc0, loc1, loc2, loc3, loc4, loc5, loc6, loc7): #Effects.eff
     if loc6[0] == 5:
       loc8 = loc6[1]
-      #empty project
-      loc9 = 0 #Nothing
-      loc10 = 0 #Nothing
-      loc11 = 0 #Nothing
-      loc12 = 0 #Nothing
-      loc13 = 0 #Nothing
-      loc14 = 0 #Nothing
-      loc15 = 0 #Nothing
-      loc16 = 0 #Nothing
-      loc17 = 0 #Nothing
-      loc14 = self.idris_Effects_46_unlabel(loc14, loc15, loc16, loc17, loc5)
+      loc14 = self.idris_Effects_46_unlabel(0, 0, 0, 0, loc5)
       loc15 = [65693,loc7]
-      retVal = self.idris_Effects_46_eff(loc9, loc10, loc11, loc12, loc13, loc14, loc8, loc15)
+      retVal = self.idris_Effects_46_eff(0, 0, 0, 0, 0, loc14, loc8, loc15)
       return retVal
     elif loc6[0] == 2:
       loc8 = loc6[1]
       loc9 = loc6[2]
-      #empty project
-      loc10 = 0 #Nothing
-      loc11 = 0 #Nothing
-      loc12 = 0 #Nothing
-      loc13 = 0 #Nothing
-      loc14 = 0 #Nothing
-      loc15 = 0 #Nothing
-      loc16 = 0 #Nothing
-      retVal = self.idris_Effects_46_execEff(loc10, loc11, loc12, loc13, loc14, loc15, loc16, loc5, loc8, loc9, loc7)
+      retVal = self.idris_Effects_46_execEff(0, 0, 0, 0, 0, 0, 0, loc5, loc8, loc9, loc7)
       return retVal
 
     elif loc6[0] == 1:
       loc8 = loc6[1]
       loc9 = loc6[2]
-      #empty project
-      loc10 = 0 #Nothing
-      loc11 = 0 #Nothing
-      loc12 = 0 #Nothing
-      loc13 = 0 #Nothing
-      loc14 = 0 #Nothing
       loc15 = [65695,loc9,loc7]
-      retVal = self.idris_Effects_46_eff(loc10, loc11, loc12, loc13, loc14, loc5, loc8, loc15)
+      retVal = self.idris_Effects_46_eff(0, 0, 0, 0, 0, loc5, loc8, loc15)
       return retVal
 
     elif loc6[0] == 3:
       loc8 = loc6[1]
       loc9 = loc6[2]
-      #empty project
-      loc10 = 0 #Nothing
-      loc11 = 0 #Nothing
-      loc12 = 0 #Nothing
-      loc13 = 0 #Nothing
-      loc14 = 0 #Nothing
-      loc15 = 0 #Nothing
-      loc16 = 0 #Nothing
-      loc17 = 0 #Nothing
-      loc15 = self.idris_Effects_46_dropEnv(loc15, loc16, loc17, loc5, loc8)
+      loc15 = self.idris_Effects_46_dropEnv(0, 0, 0, loc5, loc8)
       loc16 = [65697,loc7,loc8,loc5]
-      retVal = self.idris_Effects_46_eff(loc10, loc11, loc12, loc13, loc14, loc15, loc9, loc16)
+      retVal = self.idris_Effects_46_eff(0, 0, 0, 0, 0, loc15, loc9, loc16)
       return retVal
 
     elif loc6[0] == 4:
       loc8 = loc6[1]
       loc9 = loc6[2]
       loc10 = loc6[3]
-      #empty project
-      loc11 = 0 #Nothing
-      loc12 = 0 #Nothing
-      loc13 = 0 #Nothing
-      loc14 = 0 #Nothing
-      loc15 = 0 #Nothing
       loc16 = [1,loc8,loc9,loc5]
       loc17 = [65698,loc7]
-      retVal = self.idris_Effects_46_eff(loc11, loc12, loc13, loc14, loc15, loc16, loc10, loc17)
+      retVal = self.idris_Effects_46_eff(0, 0, 0, 0, 0, loc16, loc10, loc17)
       return retVal
 
     elif loc6[0] == 0:
       loc8 = loc6[1]
-      #empty project
       loc9 = self.idris__123_APPLY0_125_(loc7, loc8)
       retVal = self.idris__123_APPLY0_125_(loc9, loc5)
       return retVal
@@ -158,14 +118,7 @@ def idris_Effects_46_execEff(loc0, loc1, loc2, loc3, loc4, loc5, loc6, loc7, loc
         loc11 = loc7[1]
         loc12 = loc7[2]
         loc13 = loc7[3]
-        #empty project
-        loc14 = 0 #Nothing
-        loc15 = 0 #Nothing
-        loc16 = 0 #Nothing
-        loc17 = 0 #Nothing
-        loc18 = 0 #Nothing
-        loc19 = 0 #Nothing
-        loc14 = self.idris_Effects_46_handle(loc14, loc15, loc16, loc17, loc18, loc19, loc11)
+        loc14 = self.idris_Effects_46_handle(0, 0, 0, 0, 0, 0, loc11)
         loc14 = self.idris__123_APPLY0_125_(loc14, loc12)
         loc14 = self.idris__123_APPLY0_125_(loc14, loc9)
         loc15 = [65700,loc10,loc11,loc13]
@@ -179,16 +132,8 @@ def idris_Effects_46_execEff(loc0, loc1, loc2, loc3, loc4, loc5, loc6, loc7, loc
         loc12 = loc7[1]
         loc13 = loc7[2]
         loc14 = loc7[3]
-        #empty project
-        loc15 = 0 #Nothing
-        loc16 = 0 #Nothing
-        loc17 = 0 #Nothing
-        loc18 = 0 #Nothing
-        loc19 = 0 #Nothing
-        loc20 = 0 #Nothing
-        loc21 = 0 #Nothing
         loc22 = [65702,loc10,loc12,loc13]
-        retVal = self.idris_Effects_46_execEff(loc15, loc16, loc17, loc18, loc19, loc20, loc21, loc14, loc11, loc9, loc22)
+        retVal = self.idris_Effects_46_execEff(0, 0, 0, 0, 0, 0, 0, loc14, loc11, loc9, loc22)
         return retVal
 
 
@@ -209,9 +154,6 @@ def idris_io_95_bind(loc0, loc1, loc2, loc3, loc4, loc5): #io_bind
     loc7 = self.idris__123_APPLY0_125_(loc3, loc5)
     retVal = self.idris__123_APPLY0_125_(loc6, loc7)
     return retVal
-#def idris_io_95_return(loc0, loc1, loc2, loc3): #io_return
-#    retVal = loc2
-#    return retVal
 
 
 #mkForeignPrim
@@ -237,38 +179,25 @@ def idris_io_95_bind(loc0, loc1, loc2, loc3, loc4, loc5): #io_bind
 def idris_Effects_46_rebuildEnv(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #Effects.rebuildEnv
     if loc5[0] == 2:
       loc7 = loc5[1]
-      #empty project
       if loc6[0] == 1:
         loc8 = loc6[1]
         loc9 = loc6[2]
         loc10 = loc6[3]
-        #empty project
-        loc11 = 0 #Nothing
-        loc12 = 0 #Nothing
-        loc13 = 0 #Nothing
-        loc14 = 0 #Nothing
-        loc11 = self.idris_Effects_46_rebuildEnv(loc11, loc12, loc13, loc14, loc4, loc7, loc10)
+        loc11 = self.idris_Effects_46_rebuildEnv(0, 0, 0, 0, loc4, loc7, loc10)
         retVal = [1,loc8,loc9,loc11]
         return retVal
 
     elif loc5[0] == 1:
       loc7 = loc5[1]
-      #empty project
       if loc4[0] == 1:
         loc8 = loc4[1]
         loc9 = loc4[2]
         loc10 = loc4[3]
-        #empty project
         if loc6[0] == 1:
           loc11 = loc6[1]
           loc12 = loc6[2]
           loc13 = loc6[3]
-          #empty project
-          loc14 = 0 #Nothing
-          loc15 = 0 #Nothing
-          loc16 = 0 #Nothing
-          loc17 = 0 #Nothing
-          loc14 = self.idris_Effects_46_rebuildEnv(loc14, loc15, loc16, loc17, loc10, loc7, loc13)
+          loc14 = self.idris_Effects_46_rebuildEnv(0, 0, 0, 0, loc10, loc7, loc13)
           retVal = [1,loc8,loc9,loc14]
           return retVal
 
@@ -301,100 +230,43 @@ def idris_Effects_46_relabel(loc0, loc1, loc2, loc3, loc4): #Effects.relabel
       loc6 = loc4[2]
       loc7 = loc4[3]
       #empty project
-      loc8 = 0 #Nothing
-      loc9 = 0 #Nothing
-      loc10 = 0 #Nothing
-      loc11 = 0 #Nothing
-      loc8 = self.idris_Effects_46_relabel(loc8, loc9, loc10, loc11, loc7)
+      loc8 = self.idris_Effects_46_relabel(0, 0, 0, 0, loc7)
       retVal = [1,loc5,loc6,loc8]
       return retVal
     elif loc4[0] == 0:
-      #empty project
-      retVal = [0]
-      return retVal
+      return [0]
 
 
 
 def idris_Bank_46_Main_46_runDep(loc0): #Bank.Main.runDep
-    loc1 = 0 #Nothing
-    loc2 = 0 #Nothing
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
     loc5 = [65670]
     loc6 = [65677]
     loc7 = [0]
     loc6 = [1,loc6,loc0,loc7]
-    loc7 = 0 #Nothing
-    loc8 = 0 #Nothing
-    loc9 = 0 #Nothing
-    loc10 = 0 #Nothing
-    loc11 = 0 #Nothing
-    loc7 = [2,[0],[4]] #self.idris_Ethereum_46_Ether_46_save(loc7, loc8, loc9, loc10, loc11)
-    #retVal = self.idris_Effects_46_runInit(loc1, loc2, loc3, loc4, loc5, loc6, loc7)
+    loc7 = [2,[0],[4]] 
     retVal = self.idris_Effects_46_eff(0, 0, 0, 0, 0, loc6, loc7, [65704,loc5])
     return retVal
 
 
-#def idris_Effects_46_runInit(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #Effects.runInit
-#    loc7 = 0 #Nothing
-#    loc8 = 0 #Nothing
-#    loc9 = 0 #Nothing
-#    loc10 = 0 #Nothing
-#    loc11 = 0 #Nothing
-#    loc12 = [65704,loc4]
-#    retVal = self.idris_Effects_46_eff(loc7, loc8, loc9, loc10, loc11, loc5, loc6, loc12)
-#    return retVal
 
 
 def idris_Bank_46_Main_46_runWith(loc0): #Bank.Main.runWith
-    loc1 = 0 #Nothing
-    loc2 = 0 #Nothing
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
     loc5 = [65679]
     loc6 = [65686]
     loc7 = 0
     loc8 = [0]
     loc6 = [1,loc6,loc7,loc8]
-    loc7 = 0 #Nothing
-    loc7 = self.idris_Bank_46_Bank2_46_withdraw(loc0, loc7)
-    #retVal = self.idris_Effects_46_runInit(loc1, loc2, loc3, loc4, loc5, loc6, loc7)
+    loc7 = self.idris_Bank_46_Bank2_46_withdraw(loc0, 0)
     retVal = self.idris_Effects_46_eff(0, 0, 0, 0, 0, loc6, loc7, [65704,loc5])
     return retVal
 
 
 #run__IO
-#def idris_Ethereum_46_Ether_46_save(loc0, loc1, loc2, loc3, loc4): #Ethereum.Ether.save
-#    loc5 = [0]
-#    loc6 = [4]
-#    retVal = [2,loc5,loc6] 
-#    return retVal
-
-
-#def idris_Ethereum_46_Ether_46_send(loc0, loc1, loc2, loc3, loc4, loc5): #Ethereum.Ether.send
-#    loc6 = [0]
-#    loc7 = [5,loc3,loc4]
-#    retVal = [2,loc6,loc7]
-#    return retVal
 
 def idris_Ethereum_46_SIO_46_send(loc0, loc1, loc2): #Ethereum.SIO.send
-    loc3 = 0 #Nothing
-    loc4 = 0
-    loc3 = self.idris_Prelude_46_Nat_46_toIntNat_58_toIntNat_39__58_0(loc3, loc1, loc4)
+    loc3 = self.idris_Prelude_46_Nat_46_toIntNat_58_toIntNat_39__58_0(0, loc1, 0)
     retVal = send(loc0,loc3)
     return retVal
-
-
-#def idris_Ethereum_46_Ether_46_sender(loc0, loc1, loc2, loc3): #Ethereum.Ether.sender
-#    loc4 = [0]
-#    loc5 = [3]
-#    retVal = [2,loc4,loc5]
-#    return retVal
-
-
-#def idris_Ethereum_46_SIO_46_sender(loc0): #Ethereum.SIO.sender
-#    retVal = msg.sender
-#    return retVal
 
 
 def idris_Effects_46_unlabel(loc0, loc1, loc2, loc3, loc4): #Effects.unlabel
@@ -402,7 +274,6 @@ def idris_Effects_46_unlabel(loc0, loc1, loc2, loc3, loc4): #Effects.unlabel
       loc5 = loc4[1]
       loc6 = loc4[2]
       loc7 = loc4[3]
-      #empty project
       loc8 = [0]
       retVal = [1,loc5,loc6,loc8]
       return retVal
@@ -411,10 +282,7 @@ def idris_Effects_46_unlabel(loc0, loc1, loc2, loc3, loc4): #Effects.unlabel
 
 #unsafePerformPrimIO
 def idris_Bank_46_Bank2_46_withdraw(loc0, loc1): #Bank.Bank2.withdraw
-    loc2 = 0 #Nothing
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
-    loc2 = [2,[0],[3]] #self.idris_Ethereum_46_Ether_46_sender(loc2, loc3, loc4, loc1)
+    loc2 = [2,[0],[3]] 
     loc3 = [65668,loc1,loc0]
     retVal = [1,loc2,loc3]
     return retVal
@@ -422,15 +290,9 @@ def idris_Bank_46_Bank2_46_withdraw(loc0, loc1): #Bank.Bank2.withdraw
 
 def idris_Prelude_46_Bool_46__124__124_(loc0, loc1): #Prelude.Bool.||
     if loc0[0] == 0:
-      #empty project
-      #retVal = self.idris__123_EVAL0_125_(loc1)
-      return loc1 #retVal
+      return loc1
     elif loc0[0] == 1:
-      #empty project
-      retVal = [1]
-      return retVal
-
-
+      return [1]
 
 def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
     if loc0[0] == 65664:
@@ -446,7 +308,6 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       loc2 = loc0[1]
       loc3 = loc0[2]
       loc4 = loc0[3]
-      #empty project
       retVal = self.idris_Bank_46_Bank2_46__123_withdraw3_125_(loc2, loc3, loc4, loc1)
       return retVal
 
@@ -454,14 +315,12 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       loc2 = loc0[1]
       loc3 = loc0[2]
       loc4 = loc0[3]
-      #empty project
       retVal = self.idris_Bank_46_Bank2_46__123_withdraw4_125_(loc2, loc3, loc4, loc1)
       return retVal
 
     elif loc0[0] == 65668:
       loc2 = loc0[1]
       loc3 = loc0[2]
-      #empty project
       retVal = self.idris_Bank_46_Bank2_46__123_withdraw5_125_(loc2, loc3, loc1)
       return retVal
 
@@ -480,12 +339,10 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
 
     elif loc0[0] == 65672:
       loc2 = loc0[1]
-      #empty project
       retVal = self.idris_Bank_46_Main_46__123_runDep3_125_(loc2, loc1)
       return retVal
 
     elif loc0[0] == 65673:
-      #empty project
       retVal = self.idris_Bank_46_Main_46__123_runDep4_125_(loc1)
       return retVal
 
