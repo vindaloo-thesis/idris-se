@@ -21,7 +21,7 @@ codegenPHP ci = do let out = concatMap doCodegen (simpleDecls ci)
 
 start = ""
 
-helpers = ""
+helpers = "def idris_Prelude_46_Nat_46_toIntNat_58_toIntNat_39__58_0(loc0, loc1, loc2): #Prelude.Nat.toIntNat:toIntNat':0\n  return loc1\n"
 
 phpname :: Name -> String
 phpname n = "idris_" ++ concatMap phpchar (showCG n)
@@ -85,10 +85,13 @@ shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
   "Void_case",
   "Void_elim"
   ]
-shouldSkip (SN n) = True --not $ elem (str n) [
+shouldSkip n@(SN _) = not $ elem (showCG n) [
+  --"Prelude.Nat.toIntNat:toIntNat':0"
+  ]
 shouldSkip (UN n) = not $ elem (str n) [
   --Included "special" (really user defined) functions
-  "io_return"
+  "io_return",
+  "io_bind"
   ]
 shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
@@ -171,7 +174,7 @@ cgVarRead args      = "ERROR: missing case in cgVarRead" ++ show args
 
 cgVarWrite :: [(FDesc,LVar)] -> String
 cgVarWrite [(_,var),(_,val)] = "self.storage[" ++ cgVar var ++ "] = " ++ cgVar val
-cgVarWrite args              = "ERROR: missing case in cgVarWrite" ++ show args 
+cgVarWrite args              = "ERROR: missing case in cgVarWrite" ++ show args
 
 cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
 cgAlt ind ret scr scrvar f (SConstCase t exp)
@@ -228,6 +231,7 @@ cgOp (LSGt (ATInt _)) [l, r]
      = "(" ++ l ++ " > " ++ r ++ ")"
 cgOp (LSGe (ATInt _)) [l, r]
      = "(" ++ l ++ " >= " ++ r ++ ")"
+cgOp (LSExt _ _) [x] = x
      {-
 cgOp LStrEq [l,r] = "(" ++ l ++ " == " ++ r ++ ")"
 cgOp LStrRev [x] = "strrev(" ++ x ++ ")"
@@ -239,7 +243,6 @@ cgOp LStrTail [x] = "substr(" ++ x ++ ", 1)"
 cgOp (LIntStr _) [x] = "\"" ++ x ++ "\""
 cgOp (LChInt _) [x] = x
 cgOp (LIntCh _) [x] = x
-cgOp (LSExt _ _) [x] = x
 cgOp (LTrunc _ _) [x] = x
 cgOp LWriteStr [_,str] = "idris_writeStr(" ++ str ++ ")"
 cgOp LReadStr [_] = "idris_readStr()"
