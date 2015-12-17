@@ -184,7 +184,7 @@ cgAlt ind ret scr scrvar f (SDefaultCase exp)
 cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
    = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n"
              ++ project 1 lv args ++ "\n" ++ cgBody (ind+1) ret exp)
-   where project i v [] = indent (ind+1) ++ "#empty project"
+   where project i v [] = "" -- indent (ind+1) ++ "#empty project"
          project i v (n : ns) = indent (ind+1) ++ (loc v ++ " = " ++ scr ++ "[" ++ show i ++ "]\n"
                                   ++ project (i + 1) (v + 1) ns)
 

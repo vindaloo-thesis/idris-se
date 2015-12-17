@@ -40,55 +40,29 @@ def idris_Prelude_46_Classes_46_compare(loc0, loc1): #Prelude.Classes.compare
       retVal = loc2
       return retVal
 
-
-
-#def idris_Ethereum_46_Ether_46_contractAddress(loc0, loc1, loc2, loc3): #Ethereum.Ether.contractAddress
-#    loc4 = [0]
-#    loc5 = [0]
-#    retVal = [2,loc4,loc5] 
-#    return retVal
-
-
-def idris_Ethereum_46_SIO_46_contractAddress(loc0): #Ethereum.SIO.contractAddress
-    retVal = self
-    return retVal
-
-
 def idris_Effects_46_dropEnv(loc0, loc1, loc2, loc3, loc4): #Effects.dropEnv
     if loc4[0] == 2:
       loc5 = loc4[1]
-      #empty project
       if loc3[0] == 1:
         loc6 = loc3[1]
         loc7 = loc3[2]
         loc8 = loc3[3]
-        #empty project
-        loc9 = 0 #Nothing
-        loc10 = 0 #Nothing
-        loc11 = 0 #Nothing
-        retVal = self.idris_Effects_46_dropEnv(loc9, loc10, loc11, loc8, loc5)
+        retVal = self.idris_Effects_46_dropEnv(0, 0, 0, loc8, loc5)
         return retVal
 
     elif loc4[0] == 1:
       loc5 = loc4[1]
-      #empty project
       if loc3[0] == 1:
         loc6 = loc3[1]
         loc7 = loc3[2]
         loc8 = loc3[3]
-        #empty project
-        loc9 = 0 #Nothing
-        loc10 = 0 #Nothing
-        loc11 = 0 #Nothing
-        loc9 = self.idris_Effects_46_dropEnv(loc9, loc10, loc11, loc8, loc5)
+        loc9 = self.idris_Effects_46_dropEnv(0, 0, 0, loc8, loc5)
         retVal = [1,loc6,loc7,loc9]
         return retVal
 
 
     elif loc4[0] == 0:
-      #empty project
-      retVal = [0]
-      return retVal
+      return [0]
 
 
 
@@ -460,17 +434,13 @@ def idris_Prelude_46_Bool_46__124__124_(loc0, loc1): #Prelude.Bool.||
 
 def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
     if loc0[0] == 65664:
-      return [0,[1]]
-      #empty project
-      #retVal = self.idris_Bank_46_Bank2_46__123_withdraw0_125_(loc1)
-      #return retVal
+      retVal = [0,[1]]
+      return retVal
     elif loc0[0] == 65665:
       loc2 = loc0[1]
       loc3 = loc0[2]
-      #empty project
-      return [1, [2,[0],[5,loc2,loc1]], [65664]]
-      #retVal = self.idris_Bank_46_Bank2_46__123_withdraw1_125_(loc2, loc3, loc1)
-      #return retVal
+      retVal = [1, [2,[0],[5,loc2,loc1]], [65664]]
+      return retVal
 
     elif loc0[0] == 65666:
       loc2 = loc0[1]
@@ -496,21 +466,15 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return retVal
 
     elif loc0[0] == 65669:
-      return [65715,0,0,loc1]
-      #empty project
-      #retVal = self.idris_Bank_46_Main_46__123_runDep0_125_(loc1)
-      #return retVal
+      retVal = [65715,0,0,loc1]
+      return retVal
 
     elif loc0[0] == 65670:
-      #empty project
       return [65669]
-      #retVal = self.idris_Bank_46_Main_46__123_runDep1_125_(loc1)
-      #return retVal
 
     elif loc0[0] == 65671:
       loc2 = loc0[1]
       loc3 = loc0[2]
-      #empty project
       retVal = self.idris_Bank_46_Main_46__123_runDep2_125_(loc2, loc3, loc1)
       return retVal
 
@@ -546,32 +510,24 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return retVal
 
     elif loc0[0] == 65678:
-      #empty project
-      #retVal = self.idris_Bank_46_Main_46__123_runWith0_125_(loc1)
-      #return retVal
-      return [65715,0,0,loc1]
+      retVal = [65715,0,0,loc1]
+      return retVal
 
     elif loc0[0] == 65679:
-      #empty project
       return [65678]
-      #retVal = self.idris_Bank_46_Main_46__123_runWith1_125_(loc1)
-      #return retVal
 
     elif loc0[0] == 65680:
       loc2 = loc0[1]
       loc3 = loc0[2]
-      #empty project
       retVal = self.idris_Bank_46_Main_46__123_runWith2_125_(loc2, loc3, loc1)
       return retVal
 
     elif loc0[0] == 65681:
       loc2 = loc0[1]
-      #empty project
       retVal = self.idris_Bank_46_Main_46__123_runWith3_125_(loc2, loc1)
       return retVal
 
     elif loc0[0] == 65682:
-      #empty project
       retVal = self.idris_Bank_46_Main_46__123_runWith4_125_(loc1)
       return retVal
 
@@ -651,10 +607,8 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
 
     elif loc0[0] == 65693:
       loc2 = loc0[1]
-      #empty project
-      return [65692,loc0,loc1]
-      #retVal = self.idris_Effects_46__123_eff1_125_(loc2, loc1)
-      #return retVal
+      retVal = [65692,loc0,loc1]
+      return retVal
 
     elif loc0[0] == 65694:
       loc2 = loc0[1]
@@ -708,9 +662,8 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       loc3 = loc0[2]
       loc4 = loc0[3]
       #empty project
-      return [65699,loc2,loc1,loc3,loc4]
-      #retVal = self.idris_Effects_46__123_execEff1_125_(loc2, loc3, loc4, loc1)
-      #return retVal
+      retVal = [65699,loc2,loc1,loc3,loc4]
+      return retVal
 
     elif loc0[0] == 65701:
       loc2 = loc0[1]
@@ -738,20 +691,17 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
 
     elif loc0[0] == 65704:
       loc2 = loc0[1]
-      #empty project
-      return [65703,loc2,loc1]
-      #retVal = self.idris_Effects_46__123_runInit1_125_(loc2, loc1)
-      #return retVal
+      retVal = [65703,loc2,loc1]
+      return retVal
 
     elif loc0[0] == 65705:
       loc2 = loc0[1]
-      #empty project
       retVal = self.idris_Ethereum_46_SIO_46_balance(loc2, loc1)
       return retVal
 
     elif loc0[0] == 65706:
       #empty project
-      retVal = self.idris_Ethereum_46_SIO_46_contractAddress(loc1)
+      retVal = self
       return retVal
 
     elif loc0[0] == 65707:
@@ -774,20 +724,14 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
 
     elif loc0[0] == 65710:
       loc2 = loc0[1]
-      #empty project
-      #retVal = self.idris_Prelude_46_Nat_46__123_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_95_lam0_125_(loc2, loc1)
       return self.idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_36_Nat_58__33_compare_58_0(loc0, loc1)
-      return retVal
 
     elif loc0[0] == 65711:
-      #empty project
-      return [65710,loc1]
-      #retVal = self.idris_Prelude_46_Nat_46__123_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_95_lam1_125_(loc1)
-      #return retVal
+      retVal = [65710,loc1]
+      return retVal
 
     elif loc0[0] == 65712:
       loc2 = loc0[1]
-      #empty project
       retVal = self.idris_Prelude_46_Nat_46__123_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_95_lam2_125_(loc2, loc1)
       return retVal
 
@@ -831,15 +775,7 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return retVal
 
     elif True:
-      retVal = 0 #Nothing
-      return retVal
-
-
-
-#def idris__123_EVAL0_125_(loc0): #{EVAL0}
-#    if True:
-#      retVal = loc0
-#      return retVal
+      return 0
 
 
 
@@ -850,23 +786,11 @@ def idris_Effects_46__123_Ethereum_46_Ether_46_EtherRules_44__32_SIO_32_instance
     return retVal
 
 
-#def idris_Prelude_46_Nat_46__123_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_95_lam0_125_(loc0, loc1): #Prelude.Nat.{Nat instance of Prelude.Classes.Ord_lam0}
-#    retVal = self.idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_36_Nat_58__33_compare_58_0(loc0, loc1)
-#    return retVal
-
-
-#def idris_Prelude_46_Classes_46__123_Prelude_46_Nat_46_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_44__32_method_32__62__61__95_lam0_125_(loc0, loc1): #Prelude.Classes.{Prelude.Nat.Nat instance of Prelude.Classes.Ord, method >=_lam0}
-#    retVal = self.idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Eq_36_Nat_58__33__61__61__58_0(loc0, loc1)
-#    return retVal
 
 
 def idris_Effects_46__123_eff0_125_(loc0, loc1, loc2): #Effects.{eff0}
     loc3 = self.idris__123_APPLY0_125_(loc0, loc1)
-    loc4 = 0 #Nothing
-    loc5 = 0 #Nothing
-    loc6 = 0 #Nothing
-    loc7 = 0 #Nothing
-    loc4 = self.idris_Effects_46_relabel(loc4, loc5, loc6, loc7, loc2)
+    loc4 = self.idris_Effects_46_relabel(0, 0, 0, 0, loc2)
     retVal = self.idris__123_APPLY0_125_(loc3, loc4)
     return retVal
 
@@ -878,57 +802,18 @@ def idris_Effects_46__123_execEff0_125_(loc0, loc1, loc2, loc3, loc4): #Effects.
     return retVal
 
 
-#def idris__123_io_95_bind0_125_(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #{io_bind0}
-#    retVal = self.idris__123_APPLY0_125_(loc4, loc6)
-#    return retVal
-
-
-#def idris_Bank_46_Main_46__123_runDep0_125_(loc0): #Bank.Main.{runDep0}
-#    loc1 = 0 #Nothing
-#    loc2 = 0 #Nothing
-#    retVal = [65715,loc1,loc2,loc0]
-#    return retVal
-
 
 def idris_Effects_46__123_runInit0_125_(loc0, loc1, loc2): #Effects.{runInit0}
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
-    loc3 = self.idris__123_APPLY0_125_(loc0, loc4) #self.idris_Prelude_46_Applicative_46_pure(loc3, loc4, loc0)
+    loc3 = self.idris__123_APPLY0_125_(loc0, 0) #self.idris_Prelude_46_Applicative_46_pure(loc3, loc4, loc0)
     retVal = self.idris__123_APPLY0_125_(loc3, loc1)
     return retVal
 
-
-#def idris_Bank_46_Main_46__123_runWith0_125_(loc0): #Bank.Main.{runWith0}
-#    loc1 = 0 #Nothing
-#    loc2 = 0 #Nothing
-#    retVal = [65715,loc1,loc2,loc0]
-#    return retVal
-
-
-#def idris_Bank_46_Bank2_46__123_withdraw0_125_(loc0): #Bank.Bank2.{withdraw0}
-#    loc1 = [1]
-#    retVal = [0,loc1]
-#    return retVal
 
 def idris_Effects_46__123_Ethereum_46_Ether_46_EtherRules_44__32_SIO_32_instance_32_of_32_Effects_46_Handler_44__32_method_32_handle_95_lam1_125_(loc0, loc1, loc2): #Effects.{Ethereum.Ether.EtherRules, SIO instance of Effects.Handler, method handle_lam1}
     loc3 = self.idris__123_APPLY0_125_(loc0, loc2)
     retVal = self.idris__123_APPLY0_125_(loc3, loc1)
     return retVal
 
-
-#def idris_Prelude_46_Nat_46__123_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_95_lam1_125_(loc0): #Prelude.Nat.{Nat instance of Prelude.Classes.Ord_lam1}
-#    retVal = [65710,loc0]
-#    return retVal
-
-
-#def idris_Effects_46__123_eff1_125_(loc0, loc1): #Effects.{eff1}
-#    retVal = [65692,loc0,loc1]
-#    return retVal
-
-
-#def idris_Effects_46__123_execEff1_125_(loc0, loc1, loc2, loc3): #Effects.{execEff1}
-#    retVal = [65699,loc0,loc3,loc1,loc2]
-#    return retVal
 
 
 def idris__123_io_95_bind1_125_(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #{io_bind1}
@@ -945,19 +830,14 @@ def idris_Effects_46__123_Ethereum_46_Ether_46_EtherRules_44__32_SIO_32_instance
 
 
 def idris_Prelude_46_Nat_46__123_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_95_lam2_125_(loc0, loc1): #Prelude.Nat.{Nat instance of Prelude.Classes.Ord_lam2}
-    loc2 = 0 #Nothing
-    loc3 = self.idris_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_36_Nat()
-    loc2 = self.idris_Prelude_46_Classes_46_compare(loc2, loc3)
+    loc3 = [0,[65711],[65713]]
+    loc2 = self.idris_Prelude_46_Classes_46_compare(0, loc3)
     loc2 = self.idris__123_APPLY0_125_(loc2, loc0)
     loc2 = self.idris__123_APPLY0_125_(loc2, loc1)
     if loc2[0] == 2:
-      #empty project
-      retVal = [1]
-      return retVal
+      return [1]
     elif True:
-      retVal = [0]
-      return retVal
-
+      return [0]
 
 
 def idris_Effects_46__123_eff2_125_(loc0, loc1, loc2, loc3): #Effects.{eff2}
@@ -979,20 +859,12 @@ def idris__123_io_95_bind2_125_(loc0, loc1, loc2, loc3, loc4, loc5): #{io_bind2}
 
 
 def idris_Bank_46_Main_46__123_runDep2_125_(loc0, loc1, loc2): #Bank.Main.{runDep2}
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
-    loc5 = 0 #Nothing
-    loc6 = 0 #Nothing
-    retVal = self.idris_Effects_46_Ethereum_46_Ether_46__64_Effects_46_Handler_36_EtherRules_58_SIO_58__33_handle_58_0(loc3, loc4, loc5, loc6, loc0, loc1, loc2)
+    retVal = self.idris_Effects_46_Ethereum_46_Ether_46__64_Effects_46_Handler_36_EtherRules_58_SIO_58__33_handle_58_0(0, 0, 0, 0, loc0, loc1, loc2)
     return retVal
 
 
 def idris_Bank_46_Main_46__123_runWith2_125_(loc0, loc1, loc2): #Bank.Main.{runWith2}
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
-    loc5 = 0 #Nothing
-    loc6 = 0 #Nothing
-    retVal = self.idris_Effects_46_Ethereum_46_Ether_46__64_Effects_46_Handler_36_EtherRules_58_SIO_58__33_handle_58_0(loc3, loc4, loc5, loc6, loc0, loc1, loc2)
+    retVal = self.idris_Effects_46_Ethereum_46_Ether_46__64_Effects_46_Handler_36_EtherRules_58_SIO_58__33_handle_58_0(0, 0, 0, 0, loc0, loc1, loc2)
     return retVal
 
 
@@ -1041,23 +913,16 @@ def idris_Bank_46_Bank2_46__123_withdraw3_125_(loc0, loc1, loc2, loc3): #Bank.Ba
       loc4 = [1]
 
     if loc4[0] == 0:
-      #empty project
       loc4 = [0]
     elif loc4[0] == 1:
-      #empty project
       loc4 = self.idris_Bank_46_Bank2_46__123_withdraw2_125_(loc3, loc1)
 
     if loc4[0] == 0:
-      #empty project
       loc5 = [0]
       retVal = [0,loc5]
       return retVal
     elif loc4[0] == 1:
-      #empty project
-      loc5 = 0 #Nothing
-      loc6 = 0 #Nothing
-      loc7 = 0 #Nothing
-      loc5 = [2,[0],[3]] #self.idris_Ethereum_46_Ether_46_sender(loc5, loc6, loc7, loc2)
+      loc5 = [2,[0],[3]]
       loc6 = [65665,loc1,loc2]
       retVal = [1,loc5,loc6]
       return retVal
@@ -1066,11 +931,7 @@ def idris_Bank_46_Bank2_46__123_withdraw3_125_(loc0, loc1, loc2, loc3): #Bank.Ba
 
 def idris_Effects_46__123_eff4_125_(loc0, loc1, loc2, loc3, loc4): #Effects.{eff4}
     loc5 = self.idris__123_APPLY0_125_(loc0, loc1)
-    loc6 = 0 #Nothing
-    loc7 = 0 #Nothing
-    loc8 = 0 #Nothing
-    loc9 = 0 #Nothing
-    loc6 = self.idris_Effects_46_rebuildEnv(loc6, loc7, loc8, loc9, loc4, loc2, loc3)
+    loc6 = self.idris_Effects_46_rebuildEnv(0, 0, 0, 0, loc4, loc2, loc3)
     retVal = self.idris__123_APPLY0_125_(loc5, loc6)
     return retVal
 
@@ -1086,10 +947,7 @@ def idris_Bank_46_Main_46__123_runWith4_125_(loc0): #Bank.Main.{runWith4}
 
 
 def idris_Bank_46_Bank2_46__123_withdraw4_125_(loc0, loc1, loc2, loc3): #Bank.Bank2.{withdraw4}
-    loc4 = 0 #Nothing
-    loc5 = 0 #Nothing
-    loc6 = 0 #Nothing
-    loc4 = self.idris_Ethereum_46_Ether_46_balance(loc4, loc5, loc6, loc3, loc0)
+    loc4 = self.idris_Ethereum_46_Ether_46_balance(0, 0, 0, loc3, loc0)
     loc5 = [65666,loc1,loc2,loc0]
     retVal = [1,loc4,loc5]
     return retVal
@@ -1111,29 +969,14 @@ def idris_Bank_46_Main_46__123_runWith5_125_(loc0): #Bank.Main.{runWith5}
 
 
 def idris_Bank_46_Bank2_46__123_withdraw5_125_(loc0, loc1, loc2): #Bank.Bank2.{withdraw5}
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
-    loc5 = 0 #Nothing
-    loc3 = [2,[0],[0]] #self.idris_Ethereum_46_Ether_46_contractAddress(loc3, loc4, loc5, loc0)
+    loc3 = [2,[0],[0]] 
     loc4 = [65667,loc0,loc2,loc1]
     retVal = [1,loc3,loc4]
     return retVal
 
 
 def idris_Effects_46__123_eff6_125_(loc0, loc1): #Effects.{eff6}
-    loc2 = 0 #Nothing
-    loc3 = 0 #Nothing
-    loc4 = 0 #Nothing
-    loc5 = 0 #Nothing
-    loc6 = 0 #Nothing
-    loc7 = 0 #Nothing
-    loc8 = 0 #Nothing
-    loc9 = 0 #Nothing
-    loc10 = 0 #Nothing
-    loc11 = 0 #Nothing
-    loc12 = 0 #Nothing
-    loc13 = 0 #Nothing
-    retVal = [65687,loc2,loc3,loc4,loc5,loc6,loc7,loc8,loc9,loc10,loc0,loc11,loc12,loc1,loc13]
+    retVal = [65687,0,0,0,0,0,0,0,0,0,loc0,0,0,loc1,0]
     return retVal
 
 
@@ -1177,58 +1020,42 @@ def idris_Bank_46_Main_46__123_runWith8_125_(loc0): #Bank.Main.{runWith8}
 def idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Eq_36_Nat_58__33__61__61__58_0(loc0, loc1): #Prelude.Classes.Prelude.Nat.@Prelude.Classes.Eq$Nat:!==:0
     if loc1 == 0:
       if loc0 == 0:
-        retVal = [1]
-        return retVal
+        return [1]
       elif True:
-        retVal = [0]
-        return retVal
+        return [0]
 
     elif True:
-      loc2 = 1
-      loc2 = (loc1 - loc2)
+      loc2 = (loc1 - 1)
       if loc0 == 0:
-        retVal = [0]
-        return retVal
+        return [0]
       elif True:
-        loc3 = 1
-        loc3 = (loc0 - loc3)
-        loc4 = 0 #Nothing
+        loc3 = (loc0 - 1)
         loc5 = [65717]
-        loc4 = loc5 #self.idris_Prelude_46_Classes_46__61__61_(loc4, loc5)
+        loc4 = loc5 
         loc4 = self.idris__123_APPLY0_125_(loc4, loc3)
         retVal = self.idris__123_APPLY0_125_(loc4, loc2)
         return retVal
 
 
     elif True:
-      retVal = [0]
-      return retVal
-
+      return [0]
 
 
 def idris_Effects_46_Ethereum_46_Ether_46__64_Effects_46_Handler_36_EtherRules_58_SIO_58__33_handle_58_0(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #Effects.Ethereum.Ether.@Effects.Handler$EtherRules:SIO:!handle:0
     if loc5[0] == 2:
       loc7 = loc5[1]
       #empty project
-      loc8 = 0 #Nothing
-      loc9 = 0 #Nothing
-      loc10 = 0 #Nothing
       loc11 = [65705,loc7]
       loc12 = [65688,loc6,loc4]
-      retVal = [65714,loc8,loc9,loc10,loc11,loc12]
+      retVal = [65714,0,0,0,loc11,loc12]
       return retVal
     elif loc5[0] == 0:
-      #empty project
-      loc7 = 0 #Nothing
-      loc8 = 0 #Nothing
-      loc9 = 0 #Nothing
       loc10 = [65706]
       loc11 = [65689,loc6,loc4]
-      retVal = [65714,loc7,loc8,loc9,loc10,loc11]
+      retVal = [65714,0,0,0,loc10,loc11]
       return retVal
 
     elif loc5[0] == 4:
-      #empty project
       loc7 = [0]
       loc7 = self.idris__123_APPLY0_125_(loc6, loc7)
       retVal = self.idris__123_APPLY0_125_(loc7, loc4)
@@ -1237,27 +1064,19 @@ def idris_Effects_46_Ethereum_46_Ether_46__64_Effects_46_Handler_36_EtherRules_5
     elif loc5[0] == 5:
       loc7 = loc5[1]
       loc8 = loc5[2]
-      #empty project
-      loc9 = 0 #Nothing
-      loc10 = 0 #Nothing
-      loc11 = 0 #Nothing
       loc12 = [65707,loc8,loc7]
       loc13 = [65690,loc6,loc4]
-      retVal = [65714,loc9,loc10,loc11,loc12,loc13]
+      retVal = [65714,0,0,0,loc12,loc13]
       return retVal
 
     elif loc5[0] == 3:
       #empty project
-      loc7 = 0 #Nothing
-      loc8 = 0 #Nothing
-      loc9 = 0 #Nothing
       loc10 = [65708]
       loc11 = [65691,loc6,loc4]
-      retVal = [65714,loc7,loc8,loc9,loc10,loc11]
+      retVal = [65714,0,0,0,loc10,loc11]
       return retVal
 
     elif loc5[0] == 1:
-      #empty project
       loc7 = self.idris__123_APPLY0_125_(loc6, loc4)
       retVal = self.idris__123_APPLY0_125_(loc7, loc4)
       return retVal
@@ -1265,9 +1084,8 @@ def idris_Effects_46_Ethereum_46_Ether_46__64_Effects_46_Handler_36_EtherRules_5
 
 
 def idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_36_Nat_58__33__62__61__58_0(loc0, loc1): #Prelude.Classes.Prelude.Nat.@Prelude.Classes.Ord$Nat:!>=:0
-    loc2 = 0 #Nothing
-    loc3 = self.idris_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_36_Nat()
-    loc2 = self.idris_Prelude_46_Classes_46__62_(loc2, loc3)
+    loc3 = [0,[65711],[65713]]
+    loc2 = self.idris_Prelude_46_Classes_46__62_(0, loc3)
     loc2 = self.idris__123_APPLY0_125_(loc2, loc0)
     loc2 = self.idris__123_APPLY0_125_(loc2, loc1)
     if loc2[0] == 0:
@@ -1302,9 +1120,8 @@ def idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_
       elif True:
         loc3 = 1
         loc3 = (loc0 - loc3)
-        loc4 = 0 #Nothing
-        loc5 = self.idris_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_36_Nat()
-        loc4 = self.idris_Prelude_46_Classes_46_compare(loc4, loc5)
+        loc5 = [0,[65711],[65713]]
+        loc4 = self.idris_Prelude_46_Classes_46_compare(0, loc5)
         loc4 = self.idris__123_APPLY0_125_(loc4, loc3)
         retVal = self.idris__123_APPLY0_125_(loc4, loc2)
         return retVal
@@ -1315,13 +1132,6 @@ def idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_
 #_Prelude.Classes.Prelude.Nat.@Prelude.Classes.Ord$Nat:!>:0_with_84
 def idris_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Eq_36_Nat(loc0, loc1): #Prelude.Nat.@Prelude.Classes.Eq$Nat
     retVal = self.idris_Prelude_46_Classes_46_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Eq_36_Nat_58__33__61__61__58_0(loc0, loc1)
-    return retVal
-
-
-def idris_Prelude_46_Nat_46__64_Prelude_46_Classes_46_Ord_36_Nat(): #Prelude.Nat.@Prelude.Classes.Ord$Nat
-    loc0 = [65711]
-    loc1 = [65713]
-    retVal = [0,loc0,loc1]
     return retVal
 
 
@@ -1346,15 +1156,4 @@ def idris_Effects_46_eff_95_Effects_95__95_idr_95_283_95_30_95_case_95_Effects_9
       loc19 = self.idris__123_APPLY0_125_(loc4, loc5)
       retVal = self.idris__123_APPLY0_125_(loc19, loc18)
       return retVal
-
-
-
-#io_bind_IO__idr_109_34_case
-#Void_case
-#Void_elim
-
-#exports:
-#export: Bank.Main.runDep#export: Bank.Main.runWith
-#/exports1
-
 
