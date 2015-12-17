@@ -49,11 +49,6 @@ def idris_Effects_46_handle(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #Effects.
     return self.idris__123_APPLY0_125_(loc7, loc5)
 
 
-def idris_io_95_bind(loc0, loc1, loc2, loc3, loc4, loc5): #io_bind
-    loc7 = self.idris__123_APPLY0_125_(loc3, loc5)
-    return self.idris__123_APPLY0_125_([65716,loc0,loc1,loc2,loc3,loc4,loc5], loc7)
-
-
 def idris_Effects_46_rebuildEnv(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #Effects.rebuildEnv
     if loc5[0] == 2:
       if loc6[0] == 1:
@@ -87,8 +82,7 @@ def idris_Effects_46_rebuildEnv(loc0, loc1, loc2, loc3, loc4, loc5, loc6): #Effe
 
 def idris_Effects_46_relabel(loc0, loc1, loc2, loc3, loc4): #Effects.relabel
     if loc4[0] == 1:
-      loc8 = self.idris_Effects_46_relabel(0, 0, 0, 0, loc4[3])
-      retVal = [1,loc4[1],loc4[2],loc8]
+      retVal = [1,loc4[1],loc4[2],self.idris_Effects_46_relabel(0, 0, 0, 0, loc4[3])]
       return retVal
     elif loc4[0] == 0:
       return [0]
@@ -184,8 +178,7 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return self.idris__123_APPLY0_125_(self.idris__123_APPLY0_125_(loc0[10], loc0[13]), loc1[3])
 
     elif loc0[0] == 65688:
-      v0 = self.idris__123_APPLY0_125_(loc0[1], loc1)
-      return self.idris__123_APPLY0_125_(v0, loc0[2])
+      return self.idris__123_APPLY0_125_(self.idris__123_APPLY0_125_(loc0[1], loc1), loc0[2])
 
     elif loc0[0] == 65689:
       return self.idris__123_APPLY0_125_(self.idris__123_APPLY0_125_(loc0[1], loc1), loc0[2])
@@ -198,7 +191,7 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return self.idris__123_APPLY0_125_(v0, loc0[2])
 
     elif loc0[0] == 65692:
-      return self.idris_Effects_46__123_eff0_125_(loc0[1], loc0[2], loc1)
+      return self.idris__123_APPLY0_125_(self.idris__123_APPLY0_125_(loc0[1], loc0[2]), self.idris_Effects_46_relabel(0, 0, 0, 0, loc1))
 
     elif loc0[0] == 65693:
       retVal = [65692,loc0,loc1]
@@ -226,21 +219,14 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return self.idris__123_APPLY0_125_(self.idris__123_APPLY0_125_(loc0[1], loc0[2]), [1,loc0[3],loc1,loc0[4]])
 
     elif loc0[0] == 65700:
-      loc2 = loc0[1]
-      loc3 = loc0[2]
-      loc4 = loc0[3]
-      #empty project
-      retVal = [65699,loc2,loc1,loc3,loc4]
+      retVal = [65699,loc0[1],loc1,loc0[2],loc0[3]]
       return retVal
 
     elif loc0[0] == 65701:
       return self.idris__123_APPLY0_125_(self.idris__123_APPLY0_125_(loc2, loc3), [1,loc4,loc5,loc1])
 
     elif loc0[0] == 65702:
-      loc2 = loc0[1]
-      loc3 = loc0[2]
-      loc4 = loc0[3]
-      retVal = [65701,loc3,loc1,loc3,loc4]
+      retVal = [65701,loc0[1],loc1,loc0[2],loc0[3]]
       return retVal
 
     elif loc0[0] == 65703:
@@ -281,7 +267,7 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return retVal
 
     elif loc0[0] == 65714:
-      return self.idris_io_95_bind(loc0[1], loc0[2], loc0[3], loc0[4], loc0[5], loc1)
+      return self.idris__123_APPLY0_125_([65716,loc0[1],loc0[2],loc0[3],loc0[4],loc0[5],loc1], self.idris__123_APPLY0_125_(loc0[4], loc1))
 
     elif loc0[0] == 65715:
       return loc4 #self.idris_io_95_return(loc2, loc3, loc4, loc1)
@@ -294,13 +280,6 @@ def idris__123_APPLY0_125_(loc0, loc1): #{APPLY0}
       return retVal
     else:
       return 0
-
-
-
-def idris_Effects_46__123_eff0_125_(loc0, loc1, loc2): #Effects.{eff0}
-    loc3 = self.idris__123_APPLY0_125_(loc0, loc1)
-    loc4 = self.idris_Effects_46_relabel(0, 0, 0, 0, loc2)
-    return self.idris__123_APPLY0_125_(loc3, loc4)
 
 
 def idris_Prelude_46_Nat_46__123_Nat_32_instance_32_of_32_Prelude_46_Classes_46_Ord_95_lam2_125_(loc0, loc1): #Prelude.Nat.{Nat instance of Prelude.Classes.Ord_lam2}
