@@ -9,19 +9,29 @@ import Ethereum.Types
 
 data Store : Effect where
   Read  : (f : Field) -> sig Store (InterpField f) ()
+  ReadMap  : (f : MapField) -> (InterpMapKey f) -> sig Store (InterpMapVal f) ()
   Write : (f : Field) -> (InterpField f) -> sig Store () ()
+  WriteMap : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> sig Store () ()
 
 STORE : EFFECT
 STORE = MkEff () Store
 
-read : (f : Field) -> Eff (InterpField f) [STORE]
-read f = call $ GeneralStore.Read f
+namespace Field
+  read : (f : Field) -> Eff (InterpField f) [STORE]
+  read f = call $ GeneralStore.Read f
 
-write : (f : Field) -> (InterpField f) -> Eff () [STORE]
-write f x = call (Write f x)
+  write : (f : Field) -> (InterpField f) -> Eff () [STORE]
+  write f x = call (Write f x)
 
-update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
-update f fun = write f (fun !(read f))
+  update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
+  update f fun = write f (fun !(read f))
+
+namespace MapField
+  read : (f : MapField) -> (InterpMapKey f) -> Eff (InterpMapVal f) [STORE]
+  read f k = call $ GeneralStore.ReadMap f k
+
+  write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> Eff () [STORE]
+  write f k x = call (WriteMap f k x)
 
 deserialize : (f : Field) -> String -> InterpField f
 deserialize (EInt _)  = prim__fromStrInt 
@@ -62,6 +72,14 @@ instance Handler Store SIO where
   handle s (Write field val) k = do
       se_write field val
       k () s
+  handle s (ReadMap field key) k = do
+      val <- se_readMap field key
+      k val s
+      {-
+  handle s (WriteMap field key val) k = do
+      se_writemap field key val
+      k () s
+      -}
 
 
 

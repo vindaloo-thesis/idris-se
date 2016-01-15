@@ -22,7 +22,8 @@ Address = Int
 
 -- TODO: Lists, maps
 -- parameter: index
-data Field = EInt VarName --| EString String | EAddress Nat -- | EArray Nat Nat Field
+data Field    = EInt VarName -- | EString String | EAddress Nat -- | EArray Nat Nat Field
+data MapField = EMIntInt VarName 
 
 instance Show Field where
   show (EInt n)     = "EINT_" ++ show n
@@ -30,8 +31,13 @@ instance Show Field where
 --  show (EAddress n) = "EADDRESS_" ++ show n
 --  show (EArray n l t) = "EARRAY_" ++ show n
 
-name : Field -> VarName
-name (EInt n) = n
+namespace Field
+  name : Field -> VarName
+  name (EInt n) = n
+
+namespace MapField
+  name : MapField -> VarName
+  name (EMIntInt n) = n
 
 -- index : Field -> Nat
 -- index (EInt n)     = n
@@ -53,6 +59,12 @@ InterpField (EInt _) = Int
 --InterpField (EString _) = String
 --InterpField (EAddress _) = Integer
 --InterpField (EArray _ l t) = Vect l (InterpField t)
+
+InterpMapKey : MapField -> Type
+InterpMapKey (EMIntInt _) = Int
+
+InterpMapVal : MapField -> Type
+InterpMapVal (EMIntInt _) = Int
 
 -- Interpretation function: takes Schema and creates type
 Interp : Schema k -> Type
