@@ -23,6 +23,7 @@ data SeTypes : Type -> Type where
 --
 --  -- Other types
   SeUnit_io    : SeTypes ()
+  SeFun_io   : SeTypes a -> SeTypes b -> SeTypes (a -> b)
 --  PyUnit_io  : PyTypes ()
 --  PyPair_io  : PyTypes a -> PyTypes b -> PyTypes (a, b)
 --  PyList_io  : PyTypes a -> PyTypes (List a)
@@ -63,13 +64,9 @@ remainingGas = toNat <$> foreign FFI_Se "msg.gas" (SIO Int)
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
 
-{-
-se_readMap : (f : MapField) -> SIO (InterpMapKey f -> InterpMapVal f)
-se_readMap f = unRaw <$> foreign FFI_Se "readMap" (VarName -> SIO (Raw (InterpMapKey f -> InterpMapVal f))) (name f)
--}
 
-se_readMap : (f : MapField) -> (InterpMapKey f) -> SIO (InterpMapVal f)
-se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> (InterpMapKey f) -> SIO (Raw (InterpMapVal f))) (name f) k
+se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
+se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
 
 readInt : (f : Field) -> SIO (Int)
 readInt f = foreign FFI_Se "readVal" (VarName -> SIO (Int)) (name f)
