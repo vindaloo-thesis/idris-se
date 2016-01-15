@@ -68,6 +68,9 @@ se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField
 se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
 se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
 
+se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
+se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Int -> SIO ()) n k val
+
 readInt : (f : Field) -> SIO (Int)
 readInt f = foreign FFI_Se "readVal" (VarName -> SIO (Int)) (name f)
 

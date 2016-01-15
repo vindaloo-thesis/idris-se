@@ -76,7 +76,7 @@ instance Handler Store SIO where
       val <- se_readMap field key
       k val s
   handle s (WriteMap field key val) k = do
-      se_writemap field key val
+      se_writeMap field key val
       k () s
 
 
