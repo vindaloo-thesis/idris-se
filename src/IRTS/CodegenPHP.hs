@@ -160,6 +160,8 @@ cgFDesc :: Int -> (Int -> String -> String) -> FDesc -> FDesc -> [(FDesc,LVar)] 
 cgFDesc ind ret _ (FStr n) args = case n of
                                     "writeVal"   -> cgVarWrite args
                                     "readVal"    -> ret ind $ cgVarRead args
+                                    "writeMap"   -> cgMapWrite ind args
+                                    "readMap"    -> cgMapRead ind ret args
                                     "getBalance" -> ret ind $ (cgVar . snd . head $ args) ++ ".balance"
                                     _            -> ret ind $ n ++ cgFArgs args
 cgFDesc ind _   _ fdesc    _    = "ERROR!!! UNIMPLEMENTED CASE OF cgFDesc: " ++ show fdesc
@@ -175,6 +177,14 @@ cgVarRead args      = "ERROR: missing case in cgVarRead" ++ show args
 cgVarWrite :: [(FDesc,LVar)] -> String
 cgVarWrite [(_,var),(_,val)] = "self.storage[" ++ cgVar var ++ "] = " ++ cgVar val
 cgVarWrite args              = "ERROR: missing case in cgVarWrite" ++ show args
+
+cgMapRead :: Int -> (Int ->  String ->  String) -> [(FDesc,LVar)] -> String
+cgMapRead ind ret [(_,var),(_,key)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ (ret ind "self.storage[mk]")
+cgMapRead _ _ args              = "ERROR: missing case in cgMapRead" ++ show args
+
+cgMapWrite :: Int -> [(FDesc,LVar)] -> String
+cgMapWrite ind [(_,var),(_,key),(_,val)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ "self.storage[mk] = " ++ cgVar val
+cgMapWrite _ args              = "ERROR: missing case in cgMapWrite" ++ show args
 
 cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
 cgAlt ind ret scr scrvar f (SConstCase t exp)
