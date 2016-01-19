@@ -31,13 +31,9 @@ namespace Field
 
   serialize : (f : Field) -> InterpField f -> String
   serialize (EInt _) = show
-  --serialize (EString _) x = x
-  --serialize (EAddress _) x = show x
 
   deserialize : (f : Field) -> String -> InterpField f
   deserialize (EInt _)  = prim__fromStrInt 
-  --deserialize (EString _) = id
-  --deserialize (EAddress _) = cast . prim__fromStrInt 
 
 namespace MapField
   read : (f : MapField) -> (InterpMapKey f) -> Eff (InterpMapVal f) [STORE]
