@@ -26,7 +26,7 @@ instance Handler Store IO where
       f <- readFile $ show field
       case f of
            Right val => do
-             putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
+             putStrLn $ "- Read " ++ show field ++ ": " ++ trim val
              k (deserialize field val) s
            Left _ => do
              putStrLn $ "Error reading file for " ++ show field 
@@ -43,7 +43,7 @@ instance Handler Store IO where
       f <- readFile $ show field
       case f of
            Right val => do
-             putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
+             putStrLn $ "- Read " ++ show field ++ ": " ++ trim val
              k (deserialize field val) s
            Left _ => do
              putStrLn $ "Error reading file for " ++ show field 
