@@ -1,44 +1,32 @@
 module Ethereum.SIO
 
---import Python.Objects
+import Effects
 import Ethereum.Types
+import Ethereum.GeneralStore
+import Ethereum.Ether
 
 %default total
 %access public
+
+%extern prim__value : Nat
 
 unRaw : FFI_C.Raw a -> a
 unRaw (MkRaw x) = x
 
 ||| Supported Python foreign types.
 data SeTypes : Type -> Type where
-
   -- Primitive types
   SeInt_io     : SeTypes Int
---  PyNat_io     : PyTypes Nat
---  PyInteger_io : PyTypes Integer
---  PyDouble_io  : PyTypes Double
   SeBool_io    : SeTypes Bool
   SeChar_io    : SeTypes Char
   SeString_io  : SeTypes String
---  SeType_io  : SeTypes Type
---
---  -- Other types
+
+  -- Other types
   SeUnit_io    : SeTypes ()
   SeFun_io   : SeTypes a -> SeTypes b -> SeTypes (a -> b)
---  PyUnit_io  : PyTypes ()
---  PyPair_io  : PyTypes a -> PyTypes b -> PyTypes (a, b)
---  PyList_io  : PyTypes a -> PyTypes (List a)
---  PyFun_io   : PyTypes a -> PyTypes b -> PyTypes (a -> b)
---  PyMaybe_io : PyTypes a -> PyTypes (Maybe a)
---
---  ||| Python objects, opaque to Idris.
---  PyPtr_io       : PyTypes Ptr
---
---  ||| Arbitrary Idris objects, opaque to Python.
+
+  -- Arbitrary Idris objects, opaque to Serpent.
   SeAny_io : SeTypes (FFI_C.Raw a)
---
---  ||| Python objects with a signature known to Idris.
---  PyObj_io : PyTypes (Obj sig)
 
 FFI_Se : FFI
 FFI_Se = MkFFI SeTypes String String
@@ -68,8 +56,6 @@ se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField
 value : SIO Nat
 value = toNat <$> foreign FFI_Se "msg.value" (SIO Int)
 
-%extern prim__value : Nat
-
 se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
 se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
 
@@ -81,4 +67,43 @@ readInt f = foreign FFI_Se "readVal" (VarName -> SIO (Int)) (name f)
 
 se_write : (f : Field) -> (InterpField f) -> SIO ()
 se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
+
+---------------------
+-- Effect Handlers --
+---------------------
+
+instance Handler EtherRules SIO where
+  handle (MkS v t s) Value      k = k v (MkS v t s)
+
+  handle state ContractAddress  k = do
+    self <- contractAddress
+    k self state
+
+  handle state (Balance a)      k = do
+    bal <- balance a
+    k (toNat bal) state
+
+  handle (MkS v t s) (Save a)   k = k () (MkS v t (s+a))
+
+  handle (MkS v t s) (Send a r) k = do
+    send r a
+    k () (MkS v (t+a) s)
+
+  handle state Sender           k = do
+    s <- sender
+    k s state
+
+instance Handler Store SIO where
+  handle s (Read field)             k = do
+      val <- se_read field
+      k val s
+  handle s (Write field val)        k = do
+      se_write field val
+      k () s
+  handle s (ReadMap field key)      k = do
+      val <- se_readMap field key
+      k val s
+  handle s (WriteMap field key val) k = do
+      se_writeMap field key val
+      k () s
 

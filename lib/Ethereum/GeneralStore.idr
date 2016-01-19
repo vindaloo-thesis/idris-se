@@ -3,7 +3,6 @@ module Ethereum.GeneralStore
 import Data.Vect
 import Data.HVect
 import Effects
-import Ethereum.SIO
 import Ethereum.Types
 
 %default total
@@ -55,60 +54,4 @@ namespace MapField
 
   deserialize : (f : MapField) -> String -> InterpMapVal f
   deserialize (EMIntInt _)  = prim__fromStrInt 
-
-
-
--- TODO: Error handler for when files don't exist etc
-instance Handler Store IO where
-  handle s (Read field)     k =
-    do
-      f <- readFile $ show field
-      case f of
-           Right val => do
-             putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
-             k (deserialize field val) s
-           Left _ => do
-             putStrLn $ "Error reading file for " ++ show field 
-             k (defVal field) s
-                  
-  handle s (Write field val) k =
-    do
-      putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
-      writeFile (show field) (serialize field val)
-      k () s
-
-  handle s (ReadMap field key) k =
-    do
-      f <- readFile $ show field
-      case f of
-           Right val => do
-             putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
-             k (deserialize field val) s
-           Left _ => do
-             putStrLn $ "Error reading file for " ++ show field 
-             k (defVal field) s
-             
-  handle s (WriteMap field key val) k =
-    do
-      putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
-      writeFile (show field) (serialize field val)
-      k () s
-
-instance Handler Store SIO where
-  handle s (Read field)      k = do
-      val <- se_read field
-      k val s
-  handle s (Write field val) k = do
-      se_write field val
-      k () s
-  handle s (ReadMap field key) k = do
-      val <- se_readMap field key
-      k val s
-  handle s (WriteMap field key val) k = do
-      se_writeMap field key val
-      k () s
-
-
-
-
 

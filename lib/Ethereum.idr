@@ -2,7 +2,7 @@ module Ethereum
 
 --import public Ethereum.Telescope
 --import public Ethereum.Objects
-import public Ethereum.SIO
+-- import public Ethereum.SIO
 --import public Ethereum.Fields
 --import public Ethereum.Functions
 --import public Ethereum.Exceptions
