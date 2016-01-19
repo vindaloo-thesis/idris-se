@@ -260,6 +260,7 @@ cgOp LStrConcat [l,r] = "idris_append(" ++ l ++ ", " ++ r ++ ")"
 cgOp LStrCons [l,r] = "idris_append(chr(" ++ l ++ "), " ++ r ++ ")"
 cgOp (LStrInt _) [x] = x
 -}
+cgOp op@(LExternal n) _ | show n == "Ethereum.SIO.prim__value" = "msg.value"
 cgOp op exps = "0 #error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
    -- error("Operator " ++ show op ++ " not implemented")
 

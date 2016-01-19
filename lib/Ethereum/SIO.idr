@@ -20,6 +20,7 @@ data SeTypes : Type -> Type where
   SeBool_io    : SeTypes Bool
   SeChar_io    : SeTypes Char
   SeString_io  : SeTypes String
+--  SeType_io  : SeTypes Type
 --
 --  -- Other types
   SeUnit_io    : SeTypes ()
@@ -64,6 +65,10 @@ remainingGas = toNat <$> foreign FFI_Se "msg.gas" (SIO Int)
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
 
+value : SIO Nat
+value = toNat <$> foreign FFI_Se "msg.value" (SIO Int)
+
+%extern prim__value : Nat
 
 se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
 se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
