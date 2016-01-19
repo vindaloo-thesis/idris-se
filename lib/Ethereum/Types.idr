@@ -27,13 +27,13 @@ data Field    = EInt VarName -- | EString String | EAddress Nat -- | EArray Nat 
 data MapField = EMIntInt VarName 
 
 instance Show Field where
-  show (EInt n)     = "EINT_" ++ show n
---  show (EString n)  = "ESTRING_" ++ show n
---  show (EAddress n) = "EADDRESS_" ++ show n
---  show (EArray n l t) = "EARRAY_" ++ show n
+  show (EInt n)     = "EINT_" ++ n
+--  show (EString n)  = "ESTRING_" ++ n
+--  show (EAddress n) = "EADDRESS_" ++ n
+--  show (EArray n l t) = "EARRAY_" ++ n
 
 instance Show MapField where
-  show (EMIntInt n)     = "EMINT_" ++ show n
+  show (EMIntInt n)     = "EMINT_" ++ n
 
 namespace Field
   name : Field -> VarName
@@ -42,17 +42,6 @@ namespace Field
 namespace MapField
   name : MapField -> VarName
   name (EMIntInt n) = n
-
--- index : Field -> Nat
--- index (EInt n)     = n
--- index (EString n)  = n
--- index (EAddress n) = n
--- 
--- size : Field -> Nat
--- size (EInt _)     = 1
--- size (EString _)  = 1
--- size (EAddress _) = 1
---size (EArray _ l t) = l*size t
 
 --Schema definition
 Schema : Nat -> Type
@@ -64,10 +53,6 @@ InterpField (EInt _) = Int
 --InterpField (EAddress _) = Integer
 --InterpField (EArray _ l t) = Vect l (InterpField t)
 
-{-
-instance Default (InterpField (EInt _)) where
-  default = default
-  -}
 
 InterpMapKey : MapField -> Type
 InterpMapKey (EMIntInt _) = Int
