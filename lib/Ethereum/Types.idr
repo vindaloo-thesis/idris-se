@@ -3,6 +3,7 @@ module Ethereum.Types
 import Data.Vect
 import Data.HVect
 import Data.Vect.Quantifiers
+import Effect.Default
 
 %default total
 %access public
@@ -30,6 +31,9 @@ instance Show Field where
 --  show (EString n)  = "ESTRING_" ++ show n
 --  show (EAddress n) = "EADDRESS_" ++ show n
 --  show (EArray n l t) = "EARRAY_" ++ show n
+
+instance Show MapField where
+  show (EMIntInt n)     = "EMINT_" ++ show n
 
 namespace Field
   name : Field -> VarName
@@ -59,6 +63,11 @@ InterpField (EInt _) = Int
 --InterpField (EString _) = String
 --InterpField (EAddress _) = Integer
 --InterpField (EArray _ l t) = Vect l (InterpField t)
+
+{-
+instance Default (InterpField (EInt _)) where
+  default = default
+  -}
 
 InterpMapKey : MapField -> Type
 InterpMapKey (EMIntInt _) = Int

@@ -6,6 +6,7 @@ import Effects
 import Ethereum.SIO
 import Ethereum.Types
 
+%default total
 
 data Store : Effect where
   Read  : (f : Field) -> sig Store (InterpField f) ()
@@ -26,6 +27,19 @@ namespace Field
   update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
   update f fun = write f (fun !(read f))
 
+  defVal : (f: Field) -> InterpField f
+  defVal (EInt _) = 0
+
+  serialize : (f : Field) -> InterpField f -> String
+  serialize (EInt _) = show
+  --serialize (EString _) x = x
+  --serialize (EAddress _) x = show x
+
+  deserialize : (f : Field) -> String -> InterpField f
+  deserialize (EInt _)  = prim__fromStrInt 
+  --deserialize (EString _) = id
+  --deserialize (EAddress _) = cast . prim__fromStrInt 
+
 namespace MapField
   read : (f : MapField) -> (InterpMapKey f) -> Eff (InterpMapVal f) [STORE]
   read f k = call $ GeneralStore.ReadMap f k
@@ -33,37 +47,52 @@ namespace MapField
   write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> Eff () [STORE]
   write f k x = call (WriteMap f k x)
 
-deserialize : (f : Field) -> String -> InterpField f
-deserialize (EInt _)  = prim__fromStrInt 
---deserialize (EString _) = id
---deserialize (EAddress _) = cast . prim__fromStrInt 
+  defVal : (f: MapField) -> InterpMapVal f
+  defVal (EMIntInt _) = 0
 
-serialize : (f : Field) -> InterpField f -> String
-serialize (EInt _) = show
---serialize (EString _) x = x
---serialize (EAddress _) x = show x
-{-
-serialize (EArray _ l t) xs = "[" ++ serialize' "" xs ++ "]" where
-    serialize' : String -> Vect l' (InterpField t) -> String
-    serialize' acc []        = acc
-    serialize' acc [x]       = acc ++ serialize t x
-    serialize' acc (x :: xs) = serialize' (acc ++ serialize t x ++ ",") xs
--}
+  serialize : (f : MapField) -> InterpMapVal f -> String
+  serialize (EMIntInt _) = show
+
+  deserialize : (f : MapField) -> String -> InterpMapVal f
+  deserialize (EMIntInt _)  = prim__fromStrInt 
+
+
 
 -- TODO: Error handler for when files don't exist etc
-{-
 instance Handler Store IO where
   handle s (Read field)     k =
     do
-      Right val <- readFile "(show field)"
-      putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
-      k (deserialize field val) s
+      f <- readFile $ show field
+      case f of
+           Right val => do
+             putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
+             k (deserialize field val) s
+           Left _ => do
+             putStrLn $ "Error reading file for " ++ show field 
+             k (defVal field) s
+                  
   handle s (Write field val) k =
     do
       putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
       writeFile (show field) (serialize field val)
       k () s
-      -}
+
+  handle s (ReadMap field key) k =
+    do
+      f <- readFile $ show field
+      case f of
+           Right val => do
+             putStrLn $ "- Read " ++ show field ++ ": " ++ trim "val"
+             k (deserialize field val) s
+           Left _ => do
+             putStrLn $ "Error reading file for " ++ show field 
+             k (defVal field) s
+             
+  handle s (WriteMap field key val) k =
+    do
+      putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
+      writeFile (show field) (serialize field val)
+      k () s
 
 instance Handler Store SIO where
   handle s (Read field)      k = do
