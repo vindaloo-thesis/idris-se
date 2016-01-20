@@ -4,42 +4,40 @@ import Effects
 import Ethereum.Types
 
 -------------- EFFECT --------------
---  contractAddress sender origin remaningGas
-data EState = CEnv Address Address Address
 
-data Env : EState -> Type where
+data Env : Address -> Address -> Address -> Type where
   MkE : (cAddr: Address)  ->
         (sender: Address) ->
         (origin: Address) ->
-        Env (CEnv cAddr sender origin)
+        Env cAddr sender origin
 
 data EnvRules : Effect where
-  ContractAddress : sig EnvRules Address (Env e)
-  Sender          : sig EnvRules Address (Env e)
-  Origin          : sig EnvRules Address (Env e)
-  RemainingGas    : sig EnvRules Nat (Env e)
-  TimeStamp       : sig EnvRules Nat (Env e)
-  Coinbase        : sig EnvRules Address (Env e)
+  ContractAddress : sig EnvRules Address (Env c s o)
+  Sender          : sig EnvRules Address (Env c s o)
+  Origin          : sig EnvRules Address (Env c s o)
+  RemainingGas    : sig EnvRules Nat (Env c s o)
+  TimeStamp       : sig EnvRules Nat (Env c s o)
+  Coinbase        : sig EnvRules Address (Env c s o)
 
-ENV : EState -> EFFECT
-ENV e = MkEff (Env e) EnvRules
+ENV : Address -> Address -> Address -> EFFECT
+ENV c s o = MkEff (Env c s o) EnvRules
 
-contractAddress : Eff Address [ENV e]
+contractAddress : Eff Address [ENV c s o]
 contractAddress = call $ ContractAddress
 
-sender : Eff Address [ENV e]
+sender : Eff Address [ENV c s o]
 sender = call $ Sender
 
-origin : Eff Address [ENV e]
+origin : Eff Address [ENV c s o]
 origin = call $ Origin
 
-remainingGas : Eff Nat [ENV e]
+remainingGas : Eff Nat [ENV c s o]
 remainingGas = call $ RemainingGas
 
-timeStamp : Eff Nat [ENV e]
+timeStamp : Eff Nat [ENV c s o]
 timeStamp = call $ TimeStamp
 
-coinbase : Eff Address [ENV e]
+coinbase : Eff Address [ENV c s o]
 coinbase = call $ Coinbase
 
 
