@@ -28,12 +28,6 @@ data EtherRules : Effect where
 ETH : Nat -> Nat -> EFFECT
 ETH v b = MkEff (Ether v b) EtherRules
 
-ETH_IN : Nat -> Nat -> EFFECT
-ETH_IN = ETH
-
-ETH_OUT : Nat -> Nat -> EFFECT
-ETH_OUT = ETH
-
 value : Eff Nat
        [ETH v b]
 value = call $ Value
