@@ -17,17 +17,17 @@ unRaw (MkRaw x) = x
 ||| Supported Python foreign types.
 data SeTypes : Type -> Type where
   -- Primitive types
-  SeInt_io     : SeTypes Int
-  SeBool_io    : SeTypes Bool
-  SeChar_io    : SeTypes Char
-  SeString_io  : SeTypes String
+  SeInt_io    : SeTypes Int
+  SeBool_io   : SeTypes Bool
+  SeChar_io   : SeTypes Char
+  SeString_io : SeTypes String
 
   -- Other types
-  SeUnit_io    : SeTypes ()
+  SeUnit_io  : SeTypes ()
   SeFun_io   : SeTypes a -> SeTypes b -> SeTypes (a -> b)
 
   -- Arbitrary Idris objects, opaque to Serpent.
-  SeAny_io : SeTypes (FFI_C.Raw a)
+  SeAny_io   : SeTypes (FFI_C.Raw a)
 
 FFI_Se : FFI
 FFI_Se = MkFFI SeTypes String String
@@ -63,9 +63,6 @@ se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMap
 se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
 se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Int -> SIO ()) n k val
 
-readInt : (f : Field) -> SIO (Int)
-readInt f = foreign FFI_Se "readVal" (VarName -> SIO (Int)) (name f)
-
 se_write : (f : Field) -> (InterpField f) -> SIO ()
 se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
 
@@ -73,9 +70,17 @@ se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n v
 -- Effect Handlers --
 ---------------------
 
+instance Handler EnvRules SIO where
+  handle state@(MkE c _ _) ContractAddress k = k c state
+  handle state@(MkE _ s _) Sender          k = k s state
+  handle state@(MkE _ _ o) Origin          k = k o state
+  handle state RemainingGas                k = k 100 state
+  handle state TimeStamp                   k = k 1453299096 state
+  handle state@(MkE _ _ o) Coinbase        k = k o state
+
 instance Handler EtherRules SIO where
-  handle (MkS v t s)  Value      k = k v (MkS v t s)
-  handle state       (Balance a) k = do
+  handle state@(MkS v _ _)  Value k = k v state
+  handle state (Balance a)        k = do
     bal <- balance a
     k (toNat bal) state
   handle (MkS v t s) (Save a)    k = k () (MkS v t (s+a))
