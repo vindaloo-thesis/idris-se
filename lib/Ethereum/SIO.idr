@@ -4,6 +4,7 @@ import Effects
 import Ethereum.Types
 import Ethereum.GeneralStore
 import Ethereum.Ether
+import Ethereum.Environment
 
 %default total
 %access public
@@ -73,25 +74,14 @@ se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n v
 ---------------------
 
 instance Handler EtherRules SIO where
-  handle (MkS v t s) Value      k = k v (MkS v t s)
-
-  handle state ContractAddress  k = do
-    self <- contractAddress
-    k self state
-
-  handle state (Balance a)      k = do
+  handle (MkS v t s)  Value      k = k v (MkS v t s)
+  handle state       (Balance a) k = do
     bal <- balance a
     k (toNat bal) state
-
-  handle (MkS v t s) (Save a)   k = k () (MkS v t (s+a))
-
-  handle (MkS v t s) (Send a r) k = do
+  handle (MkS v t s) (Save a)    k = k () (MkS v t (s+a))
+  handle (MkS v t s) (Send a r)  k = do
     send r a
     k () (MkS v (t+a) s)
-
-  handle state Sender           k = do
-    s <- sender
-    k s state
 
 instance Handler Store SIO where
   handle s (Read field)             k = do

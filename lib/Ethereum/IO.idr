@@ -4,21 +4,20 @@ import Effects
 import Ethereum.Types
 import Ethereum.GeneralStore
 import Ethereum.Ether
+import Ethereum.Environment
+
+instance Handler EnvRules IO where
+  handle state@(MkE c _ _) ContractAddress k = k c state
+  handle state@(MkE _ s _) Sender          k = k s state
+  handle state@(MkE _ _ o) Origin          k = k o state
 
 instance Handler EtherRules IO where
-  handle (MkS v t s) Value    k = k v (MkS v t s)
-
-  handle (MkS v t s) ContractAddress k = k 0x00000000000000000000000000000000deadbeef (MkS v t s)
-
-  handle (MkS v t s) (Balance a) k = k 100 (MkS v t s) -- TODO: Change this. Balance should be *read*.
-
-  handle (MkS v t s) (Save a) k = do putStrLn $ "- Saved " ++ show a
-                                     k () (MkS v t (s+a))
-
-  handle (MkS v t s) (Send a r) k = do putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
-                                       k () (MkS v (t+a) s)
-
-  handle (MkS v t s) Sender k   = k 0x00cf7667b8dd4ece1728ef7809bc844a1356aadf (MkS v t s)
+  handle state@(MkS v _ _) Value k = k v   state
+  handle state (Balance a)       k = k 100 state
+  handle (MkS v t s) (Save a)    k = do putStrLn $ "- Saved " ++ show a
+                                        k () (MkS v t (s+a))
+  handle (MkS v t s) (Send a r)  k = do putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
+                                        k () (MkS v (t+a) s)
 
 instance Handler Store IO where
   handle s (Read field)     k =

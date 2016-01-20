@@ -1,9 +1,11 @@
 package serpent
 
 modules = Ethereum
+	, Ethereum.IO
 	, Ethereum.SIO
 	, Ethereum.Types
 	, Ethereum.GeneralStore
 	, Ethereum.Ether
+	, Ethereum.Environment
 
 opts = "-p effects"

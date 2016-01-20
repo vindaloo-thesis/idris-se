@@ -1,23 +1,17 @@
 module Ethereum.Ether
 
 import Effects
-import Data.Fin
-import Data.So
-import Effect.StdIO
-import Effect.Exception
-import Control.IOExcept
 import Ethereum.Types
 
 ------------ TYPES -----------------
 data Commit a = Comm a
 
 -------------- EFFECT --------------
-data CState = NotRunning | Running Nat Nat Nat
+-- value transferred saved
+data CState = Running Nat Nat Nat
+
 Init : Nat -> CState
 Init v = Running v 0 0
-
-Finished : {v : Nat} -> Nat -> Nat -> CState
-Finished {v} t s = Running v t s
 
 data Ether : CState -> Type where
   MkS : (value: Nat) -> (trans: Nat) -> (saved: Nat) -> Ether (Running value trans saved)
@@ -28,15 +22,10 @@ instance Default CState where
 instance Default (Ether (Running v 0 0)) where
   default {v} = MkS v 0 0 
 
---TODO: Can we remove Finish here and just use Running?
 data EtherRules : Effect where
-  ContractAddress : sig EtherRules Address
-                    (Ether (Running v t s))
   Value   : sig EtherRules Nat
             (Ether (Running v t s))
   Balance : Address -> sig EtherRules Nat
-            (Ether (Running v t s))
-  Sender   : sig EtherRules Address
             (Ether (Running v t s))
   Save    : (a : Nat) -> 
             sig EtherRules ()
@@ -51,22 +40,11 @@ data EtherRules : Effect where
 ETH : CState -> EFFECT
 ETH h = MkEff (Ether h) EtherRules
 
-Contract : (x : Type) -> (ce : x -> List EFFECT) -> Type
-Contract x ce = {m : Type -> Type} -> {v : Nat} -> EffM m x [ETH (Init v)] ce
-
 ETH_IN : Nat -> EFFECT
 ETH_IN v = ETH (Init v)
 
 ETH_OUT : Nat -> Nat -> Nat -> EFFECT
-ETH_OUT v t s = ETH (Finished {v} t s)
-
-contractAddress : Eff Address
-       [ETH (Running v t s)]
-contractAddress = call $ ContractAddress
-
-sender : Eff Address
-       [ETH (Running v t s)]
-sender = call $ Sender
+ETH_OUT v t s = ETH (Running v t s)
 
 value : Eff Nat
        [ETH (Running v t s)]
