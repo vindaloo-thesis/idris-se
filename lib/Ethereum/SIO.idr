@@ -91,14 +91,14 @@ instance Handler EnvRules SIO where
     k cb state
 
 instance Handler EtherRules SIO where
-  handle state@(MkS v _ _)  Value k = k v state
-  handle state (Balance a)        k = do
+  handle state@(MkS v _ _ _) Value k = k v state
+  handle state (Balance a)         k = do
     bal <- balance a
     k (toNat bal) state
-  handle (MkS v t s) (Save a)    k = k () (MkS v t (s+a))
-  handle (MkS v t s) (Send a r)  k = do
+  handle (MkS v b t s) (Save a)    k = k () (MkS v b t (s+a))
+  handle (MkS v b t s) (Send a r)  k = do
     send r a
-    k () (MkS v (t+a) s)
+    k () (MkS v b (t+a) s)
 
 instance Handler Store SIO where
   handle s (Read field)             k = do
