@@ -48,8 +48,14 @@ send a n = foreign FFI_Se "send" (Address -> Int -> SIO ()) a (toIntNat n)
 contractAddress : SIO Address
 contractAddress = foreign FFI_Se "self" (SIO Address)
 
+coinbase : SIO Address
+coinbase = foreign FFI_Se "block.coinbase" (SIO Address)
+
 remainingGas : SIO Nat
 remainingGas = toNat <$> foreign FFI_Se "msg.gas" (SIO Int)
+
+timestamp : SIO Nat
+timestamp = toNat <$> foreign FFI_Se "block.timestamp" (SIO Int)
 
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
@@ -74,9 +80,15 @@ instance Handler EnvRules SIO where
   handle state@(MkE c _ _) ContractAddress k = k c state
   handle state@(MkE _ s _) Sender          k = k s state
   handle state@(MkE _ _ o) Origin          k = k o state
-  handle state RemainingGas                k = k 100 state
-  handle state TimeStamp                   k = k 1453299096 state
-  handle state@(MkE _ _ o) Coinbase        k = k o state
+  handle state RemainingGas                k = do
+    gas <- remainingGas
+    k gas state
+  handle state TimeStamp                   k = do
+    time <- timestamp
+    k time state
+  handle state@(MkE _ _ o) Coinbase        k = do
+    cb <- coinbase
+    k cb state
 
 instance Handler EtherRules SIO where
   handle state@(MkS v _ _)  Value k = k v state
