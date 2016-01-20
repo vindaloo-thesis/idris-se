@@ -2,18 +2,10 @@ module Ethereum.Types
 
 import Data.Vect
 import Data.HVect
-import Data.Vect.Quantifiers
 import Effect.Default
 
 %default total
 %access public
-
--- Missing head, tail function for HVect
-head : HVect (t::ts) -> t
-head (x::_) = x
-
-tail : HVect (t::ts) -> HVect ts
-tail (_::xs) = xs
 
 VarName : Type
 VarName = String
