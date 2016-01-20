@@ -6,5 +6,4 @@
 *.o
 *.h
 *.cache
-dist/setup-config
-dist/build/autogen/Paths_idris_se.hs
+dist
