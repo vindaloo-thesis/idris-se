@@ -54,6 +54,9 @@ coinbase = foreign FFI_Se "block.coinbase" (SIO Address)
 remainingGas : SIO Nat
 remainingGas = toNat <$> foreign FFI_Se "msg.gas" (SIO Int)
 
+contractBalance : SIO Nat
+contractBalance = toNat <$> foreign FFI_Se "self.balance" (SIO Int)
+
 timestamp : SIO Nat
 timestamp = toNat <$> foreign FFI_Se "block.timestamp" (SIO Int)
 
@@ -91,8 +94,9 @@ instance Handler EnvRules SIO where
     k cb state
 
 instance Handler EtherRules SIO where
-  handle state@(MkS v _ _ _) Value k = k v state
-  handle state (Balance a)         k = do
+  handle state@(MkS v _ _ _) Value           k = k v state
+  handle state@(MkS _ b _ _) ContractBalance k = k b state
+  handle state (Balance a)                   k = do
     bal <- balance a
     k (toNat bal) state
   handle (MkS v b t s) (Save a)    k = k () (MkS v b t (s+a))

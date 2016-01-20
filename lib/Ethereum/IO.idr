@@ -15,12 +15,13 @@ instance Handler EnvRules IO where
   handle state@(MkE _ _ o) Coinbase        k = k o state
 
 instance Handler EtherRules IO where
-  handle state@(MkS v _ _ _) Value k = k v   state
-  handle state (Balance a)         k = k 100 state
-  handle (MkS v b t s) (Save a)    k = do putStrLn $ "- Saved " ++ show a
-                                          k () (MkS v b t (s+a))
-  handle (MkS v b t s) (Send a r)  k = do putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
-                                          k () (MkS v b (t+a) s)
+  handle state@(MkS v _ _ _) Value           k = k v   state
+  handle state@(MkS _ b _ _) ContractBalance k = k b   state
+  handle state               (Balance a)     k = k 100 state
+  handle (MkS v b t s)       (Save a)        k = do putStrLn $ "- Saved " ++ show a
+                                                    k () (MkS v b t (s+a))
+  handle (MkS v b t s)       (Send a r) k = do putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
+                                               k () (MkS v b (t+a) s)
 
 instance Handler Store IO where
   handle s (Read field)     k =
