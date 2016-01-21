@@ -6,7 +6,7 @@ import Idris.ElabDecls
 import Idris.REPL
 
 import IRTS.Compiler
-import IRTS.CodegenPHP
+import IRTS.CodegenSe
 
 import System.Environment
 import System.Exit
@@ -18,12 +18,12 @@ data Opts = Opts { inputs :: [FilePath],
                    interface :: Bool,
                    output :: FilePath }
 
-showUsage = do putStrLn "Usage: idris-php <ibc-files> [-o <output-file>]"
+showUsage = do putStrLn "Usage: idris-se <ibc-files> [-o <output-file>]"
                exitWith ExitSuccess
 
 getOpts :: IO Opts
 getOpts = do xs <- getArgs
-             return $ process (Opts [] False "a.php") xs
+             return $ process (Opts [] False "a.se") xs
   where
     process opts ("-o":o:xs) = process (opts { output = o }) xs
     process opts ("--interface":xs) = process (opts { interface = True }) xs
@@ -37,7 +37,7 @@ c_main opts = do elabPrims
                                 then liftM Just elabMain
                                 else return Nothing
                  ir <- compile (Via "c") (output opts) mainProg
-                 runIO $ codegenPHP ir
+                 runIO $ codegenSe ir
 
 main :: IO ()
 main = do opts <- getOpts

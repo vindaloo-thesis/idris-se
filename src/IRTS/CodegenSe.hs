@@ -1,4 +1,4 @@
-module IRTS.CodegenPHP(codegenPHP) where
+module IRTS.CodegenSe(codegenSe) where
 
 import IRTS.CodegenCommon
 import IRTS.Lang
@@ -9,10 +9,10 @@ import Data.Maybe
 import Data.Char
 import Data.List
 
-codegenPHP :: CodeGenerator
-codegenPHP ci = do let out = concatMap doCodegen (simpleDecls ci)
-                       exports = concat (concatMap cgExport (exportDecls ci))
-                   writeFile (outputFile ci) ("\n" ++ helpers ++ "\n" ++
+codegenSe :: CodeGenerator
+codegenSe ci = do let out = concatMap doCodegen (simpleDecls ci)
+                      exports = concat (concatMap cgExport (exportDecls ci))
+                  writeFile (outputFile ci) ("\n" ++ helpers ++ "\n" ++
                                                         out ++ "\n#exports:\n" ++
                                                         exports ++ "\n#/exports" ++
                                                         show (length (exportDecls ci)) ++
@@ -23,13 +23,13 @@ start = ""
 
 helpers = "def idris_Prelude_46_Nat_46_toIntNat_58_toIntNat_39__58_0(loc0, loc1, loc2): #Prelude.Nat.toIntNat:toIntNat':0\n  return loc1\n"
 
-phpname :: Name -> String
-phpname n = "idris_" ++ concatMap phpchar (showCG n)
-  where phpchar x | isAlpha x || isDigit x = [x]
-                  | otherwise = "_" ++ show (fromEnum x) ++ "_"
+sename :: Name -> String
+sename n = "idris_" ++ concatMap sechar (showCG n)
+  where sechar x | isAlpha x || isDigit x = [x]
+                 | otherwise = "_" ++ show (fromEnum x) ++ "_"
 
 var :: Name -> String
-var n = phpname n
+var n = sename n
 
 loc :: Int -> String
 loc i = "loc" ++ show i
@@ -48,7 +48,6 @@ cgExportDecl :: Export -> String
 cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys)
     = cgExportFun fn en (length argTys)
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
--- Example: ExportFun Main.exports, greet (FStr "greet") (FIO (FCon PyUnit)) []
 
 cgExportFun :: Name -> String -> Int -> String
 cgExportFun fn en argCnt
@@ -98,7 +97,7 @@ shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" 
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
   | shouldSkip n = "#"++ showCG n ++"\n"
-  | otherwise    = "def " ++ phpname n ++ "("
+  | otherwise    = "def " ++ sename n ++ "("
                     ++ showSep ", " (map (loc . fst) (zip [0..] args)) ++ "): #"++ showCG n ++"\n"
                     ++ cgBody 2 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
@@ -118,7 +117,7 @@ isEthereumPrim :: Name -> Bool
 isEthereumPrim (NS f ns) = any (\x -> str x == "Ether") ns
 isEthereumPrim n         = False
 
--- cgBody converts the SExp into a chunk of php which calculates the result
+-- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
 --
 -- We do it this way because we might calculate an expression in a deeply nested
@@ -126,11 +125,11 @@ isEthereumPrim n         = False
 -- expression itself may happen quite deeply.
 
 cgBody :: Int -> (Int -> String -> String) -> SExp -> String
-cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ phpname n ++ "()")
+cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ sename n ++ "()")
 cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
 cgBody ind ret (SApp _ f args)
 --  | isEthereumPrim f = indent ind ++ ret ind (etherApp f (map cgVar args))
-  | otherwise        = indent ind ++ ret ind ("self." ++ phpname f ++ "(" ++
+  | otherwise        = indent ind ++ ret ind ("self." ++ sename f ++ "(" ++
                                    showSep ", " (map cgVar args) ++ ")")
 cgBody ind ret (SLet (Loc i) v sc)
    = cgBody ind (\_ x -> loc i ++ " = " ++ x ++ "\n") v ++
@@ -217,7 +216,7 @@ cgVar (Glob n) = var n
 
 cgConst :: Const -> String
 cgConst (I i) = show i
-cgConst (Ch i) = show (ord i) -- Treat Char as ints, because PHP treats them as Strings...
+cgConst (Ch i) = show (ord i) -- Treat Char as ints, because Se treats them as Strings...
 cgConst (BI i) = show i
 cgConst (Str s) = show s
 cgConst TheWorld = "0 #TheWorld"
