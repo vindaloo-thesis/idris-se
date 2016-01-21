@@ -15,7 +15,7 @@ import Ethereum.Environment
 unRaw : FFI_C.Raw a -> a
 unRaw (MkRaw x) = x
 
--- Supported Python foreign types.
+-- Supported foreign types
 data SeTypes : Type -> Type where
   -- Primitive types
   SeInt_io    : SeTypes Int
@@ -27,7 +27,7 @@ data SeTypes : Type -> Type where
   SeUnit_io  : SeTypes ()
   SeFun_io   : SeTypes a -> SeTypes b -> SeTypes (a -> b)
 
-  -- Arbitrary Idris objects, opaque to Serpent.
+  -- Arbitrary Idris objects, opaque to Serpent
   SeAny_io   : SeTypes (FFI_C.Raw a)
 
 FFI_Se : FFI
