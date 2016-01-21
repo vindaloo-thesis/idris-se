@@ -10,6 +10,7 @@ import Ethereum.Environment
 %access public
 
 %extern prim__value : Nat
+%extern prim__balance : Nat
 
 unRaw : FFI_C.Raw a -> a
 unRaw (MkRaw x) = x
