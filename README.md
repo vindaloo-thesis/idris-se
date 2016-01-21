@@ -6,7 +6,7 @@ Proof-of-concept compiler back end for smart contracts written in Idris. Compile
 
 Examples
 --------
-http://https://github.com/vindaloo-thesis/examples
+https://github.com/vindaloo-thesis/examples
 
 Build
 -----
