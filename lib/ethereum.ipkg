@@ -4,7 +4,7 @@ modules = Ethereum
 	, Ethereum.IO
 	, Ethereum.SIO
 	, Ethereum.Types
-	, Ethereum.GeneralStore
+	, Ethereum.Store
 	, Ethereum.Ether
 	, Ethereum.Environment
 

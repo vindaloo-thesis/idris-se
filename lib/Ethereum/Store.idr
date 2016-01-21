@@ -1,4 +1,4 @@
-module Ethereum.GeneralStore
+module Ethereum.Store
 
 import Data.Vect
 import Data.HVect
@@ -7,6 +7,45 @@ import Ethereum.Types
 
 %default total
 
+---- TYPES ----
+VarName : Type
+VarName = String
+
+data Field    = EInt VarName 
+data MapField = EMIntInt VarName 
+
+instance Show Field where
+  show (EInt n)     = "EINT_" ++ n
+
+instance Show MapField where
+  show (EMIntInt n)     = "EMINT_" ++ n
+
+namespace Field
+  name : Field -> VarName
+  name (EInt n) = n
+
+namespace MapField
+  name : MapField -> VarName
+  name (EMIntInt n) = n
+
+--Schema definition
+Schema : Nat -> Type
+Schema k = Vect k Field
+
+InterpField : Field -> Type
+InterpField (EInt _) = Int
+
+InterpMapKey : MapField -> Type
+InterpMapKey (EMIntInt _) = Int
+
+InterpMapVal : MapField -> Type
+InterpMapVal (EMIntInt _) = Int
+
+-- Interpretation function: takes Schema and creates type
+Interp : Schema k -> Type
+Interp schema = HVect (map InterpField schema)
+
+---- EFFECT ----
 data Store : Effect where
   Read  : (f : Field) -> sig Store (InterpField f) ()
   ReadMap  : (f : MapField) -> (InterpMapKey f) -> sig Store (InterpMapVal f) ()
@@ -18,7 +57,7 @@ STORE = MkEff () Store
 
 namespace Field
   read : (f : Field) -> Eff (InterpField f) [STORE]
-  read f = call $ GeneralStore.Read f
+  read f = call $ Read f
 
   write : (f : Field) -> (InterpField f) -> Eff () [STORE]
   write f x = call (Write f x)
@@ -37,7 +76,7 @@ namespace Field
 
 namespace MapField
   read : (f : MapField) -> (InterpMapKey f) -> Eff (InterpMapVal f) [STORE]
-  read f k = call $ GeneralStore.ReadMap f k
+  read f k = call $ ReadMap f k
 
   write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> Eff () [STORE]
   write f k x = call (WriteMap f k x)
