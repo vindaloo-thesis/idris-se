@@ -59,34 +59,3 @@ send : (a : Nat) -> (r : Address) -> Eff ()
        [ETH v b t s]
        [ETH v b (t+a) s]
 send a r = call $ Send a r
-
-
-syntax [res] "{" "VALUE" "=" [v] ";" "BALANCE" "=" [b] ";" "SEND" "=" [t] ";" "SAVE" "=" [s] "}" = TransEff.Eff res [ETH v b 0 0] [ETH v b t s]
-
-syntax [res] "{" "VALUE" "=" [v] ";" "BALANCE" "=" [b] ";" "SEND" "=" [t] ";" "SAVE" "=" [s] ";" [effs] "}" = TransEff.Eff res (ETH v b 0 0 :: effs) (ETH v b t s :: effs)
-
-syntax [restype] "{" {res} "=>" "VALUE" "=" [v] ";" "BALANCE" "=" [b] ";" "SEND" "=" [t] ";" "SAVE" "=" [s] "}" = DepEff.Eff restype [ETH v b 0 0] (\res => [ETH v b t s])
-
-syntax [restype] "{" {res} "=>" "VALUE" "=" [v] ";" "BALANCE" "=" [b] ";" "SEND" "=" [t] ";" "SAVE" "=" [s] ";" [effs] "}" = DepEff.Eff restype (ETH v b 0 0 :: effs) (\res => ETH v b t s :: effs)
-
-
-addPlayer : Int -> {auto p: LTE 10 value} -> Bool { success => 
-                                                    VALUE   = value
-                                                  ; BALANCE = balance
-                                                  ; SEND    = if success then value-10 else value
-                                                  ; SAVE    = if success then 10 else 0
-                                                  ; [STORE] }
-addPlayer = believe_me
-
---         , SEND    : (\success => if success then value - 10 else value) , SAVE : (\success => if success then 10 else 0 ) }
-{-
-syntax [restype] "{" {res} "=>" "VALUE" "=" [v] ";" "BALANCE" "=" [b] ";" "SEND" "=" [t] ";" "SAVE" "=" [s] "}" = DepEff.Eff restype [ETH v b 0 0] (\ress => [ETH v b (t ress) (s ress)])
-
-
-addPlayer : Int -> Bool { success =>
-                          VALUE   = value
-                        ; BALANCE = balance
-                        ; SEND    = if success then (value-10) else value
-                        ; SAVE    = 0 }
-addPlayer = believe_me
--}
