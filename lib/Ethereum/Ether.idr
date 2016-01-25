@@ -2,7 +2,6 @@ module Ethereum.Ether
 
 import Effects
 import Ethereum.Types
-import Ethereum.GeneralStore
 
 ------------ TYPES -----------------
 data Commit a = Comm a
@@ -31,12 +30,6 @@ data EtherRules : Effect where
 
 ETH : Nat -> Nat -> Nat -> Nat -> EFFECT
 ETH v b t s = MkEff (Ether v b t s) EtherRules
-
-ETH_IN : Nat -> Nat -> EFFECT
-ETH_IN v b = ETH v b 0 0
-
-ETH_OUT : Nat -> Nat -> Nat -> Nat -> EFFECT
-ETH_OUT = ETH
 
 value : Eff Nat
        [ETH v b t s]
