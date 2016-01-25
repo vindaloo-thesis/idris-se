@@ -28,10 +28,6 @@ namespace MapField
   name : MapField -> VarName
   name (EMIntInt n) = n
 
---Schema definition
-Schema : Nat -> Type
-Schema k = Vect k Field
-
 InterpField : Field -> Type
 InterpField (EInt _) = Int
 
@@ -40,10 +36,6 @@ InterpMapKey (EMIntInt _) = Int
 
 InterpMapVal : MapField -> Type
 InterpMapVal (EMIntInt _) = Int
-
--- Interpretation function: takes Schema and creates type
-Interp : Schema k -> Type
-Interp schema = HVect (map InterpField schema)
 
 ---- EFFECT ----
 data Store : Effect where
