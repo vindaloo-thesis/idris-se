@@ -2,7 +2,7 @@ module Ethereum.SIO
 
 import Effects
 import Ethereum.Types
-import Ethereum.GeneralStore
+import Ethereum.Store
 import Ethereum.Ether
 import Ethereum.Environment
 
@@ -15,7 +15,7 @@ import Ethereum.Environment
 unRaw : FFI_C.Raw a -> a
 unRaw (MkRaw x) = x
 
-||| Supported Python foreign types.
+-- Supported foreign types
 data SeTypes : Type -> Type where
   -- Primitive types
   SeInt_io    : SeTypes Int
@@ -27,25 +27,29 @@ data SeTypes : Type -> Type where
   SeUnit_io  : SeTypes ()
   SeFun_io   : SeTypes a -> SeTypes b -> SeTypes (a -> b)
 
-  -- Arbitrary Idris objects, opaque to Serpent.
+  -- Arbitrary Idris objects, opaque to Serpent
   SeAny_io   : SeTypes (FFI_C.Raw a)
 
 FFI_Se : FFI
 FFI_Se = MkFFI SeTypes String String
 
-||| Serpent IO.
 SIO : Type -> Type
 SIO = IO' FFI_Se
+
+-- Ether
+value : SIO Nat
+value = toNat <$> foreign FFI_Se "msg.value" (SIO Int)
 
 balance : Address -> SIO Int
 balance a = foreign FFI_Se "getBalance" (Address -> SIO Int) a
 
-sender : SIO Address
-sender = foreign FFI_Se "msg.sender" (SIO Int)
-
 send : Address -> Nat -> SIO ()
 send a n = foreign FFI_Se "send" (Address -> Int -> SIO ()) a (toIntNat n)
 
+sender : SIO Address
+sender = foreign FFI_Se "msg.sender" (SIO Int)
+
+-- Environment
 contractAddress : SIO Address
 contractAddress = foreign FFI_Se "self" (SIO Address)
 
@@ -61,20 +65,18 @@ contractBalance = toNat <$> foreign FFI_Se "self.balance" (SIO Int)
 timestamp : SIO Nat
 timestamp = toNat <$> foreign FFI_Se "block.timestamp" (SIO Int)
 
+-- Store
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
 
-value : SIO Nat
-value = toNat <$> foreign FFI_Se "msg.value" (SIO Int)
+se_write : (f : Field) -> (InterpField f) -> SIO ()
+se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
 
 se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
 se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
 
 se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
 se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Int -> SIO ()) n k val
-
-se_write : (f : Field) -> (InterpField f) -> SIO ()
-se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
 
 ---------------------
 -- Effect Handlers --

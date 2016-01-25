@@ -2,7 +2,7 @@ module Ethereum.IO
 
 import Effects
 import Ethereum.Types
-import Ethereum.GeneralStore
+import Ethereum.Store
 import Ethereum.Ether
 import Ethereum.Environment
 

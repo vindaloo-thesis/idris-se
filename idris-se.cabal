@@ -2,12 +2,10 @@ Name:           idris-se
 Version:        0.0.0.1
 License:        BSD3
 License-file:   CRAPL-LICENSE.txt
-Author:         Edwin Brady
-Maintainer:	Edwin Brady <ecb10@st-andrews.ac.uk>
+Author:         Robert Edström and Jack Pettersson
+Maintainer:	Robert Edström <legogris@legogris.se>
 Build-Type:	Simple
 Cabal-Version:  >= 1.8
-Extra-source-files:
-		phprts/*.php
 
 Executable idris-codegen-se
   Main-is:        Main.hs
@@ -22,7 +20,7 @@ Executable idris-codegen-se
                 , mtl
                 , transformers
 
-  other-modules: IRTS.CodegenPHP
+  other-modules: IRTS.CodegenSe
 
   if os(linux)
      cpp-options:   -DLINUX
