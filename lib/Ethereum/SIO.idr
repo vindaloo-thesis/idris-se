@@ -82,7 +82,7 @@ se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> In
 -- Effect Handlers --
 ---------------------
 
-instance Handler EnvRules SIO where
+Handler EnvRules SIO where
   handle state@(MkE c _ _) ContractAddress k = k c state
   handle state@(MkE _ s _) Sender          k = k s state
   handle state@(MkE _ _ o) Origin          k = k o state
@@ -96,7 +96,7 @@ instance Handler EnvRules SIO where
     cb <- coinbase
     k cb state
 
-instance Handler EtherRules SIO where
+Handler EtherRules SIO where
   handle state@(MkS v _ _ _) Value           k = k v state
   handle state@(MkS _ b _ _) ContractBalance k = k b state
   handle state (Balance a)                   k = do
@@ -107,7 +107,7 @@ instance Handler EtherRules SIO where
     send r a
     k () (MkS v b (t+a) s)
 
-instance Handler Store SIO where
+Handler Store SIO where
   handle s (Read field)             k = do
       val <- se_read field
       k val s

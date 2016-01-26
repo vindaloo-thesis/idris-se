@@ -14,10 +14,10 @@ VarName = String
 data Field    = EInt VarName 
 data MapField = EMIntInt VarName 
 
-instance Show Field where
+Show Field where
   show (EInt n)     = "EINT_" ++ n
 
-instance Show MapField where
+Show MapField where
   show (EMIntInt n)     = "EMINT_" ++ n
 
 namespace Field
