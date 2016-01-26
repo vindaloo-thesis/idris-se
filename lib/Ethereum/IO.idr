@@ -23,6 +23,32 @@ Handler EtherRules IO where
   handle (MkS v b t s)       (Send a r) k = do putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
                                                k () (MkS v b (t+a) s)
 
+namespace Field
+  private
+  serialize : (f : Field) -> InterpField f -> String
+  serialize (EInt _) = show
+
+  private
+  deserialize : (f : Field) -> String -> InterpField f
+  deserialize (EInt _)  = prim__fromStrInt 
+
+  private 
+  defVal : (f: Field) -> InterpField f
+  defVal (EInt _) = 0
+
+namespace MapField
+  private
+  serialize : (f : MapField) -> InterpMapVal f -> String
+  serialize (EMIntInt _) = show
+
+  private
+  deserialize : (f : MapField) -> String -> InterpMapVal f
+  deserialize (EMIntInt _)  = prim__fromStrInt 
+
+  private
+  defVal : (f: MapField) -> InterpMapVal f
+  defVal (EMIntInt _) = 0
+
 Handler Store IO where
   handle s (Read field)     k =
     do

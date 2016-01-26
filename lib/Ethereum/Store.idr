@@ -18,7 +18,7 @@ Show Field where
   show (EInt n)     = "EINT_" ++ n
 
 Show MapField where
-  show (EMIntInt n)     = "EMINT_" ++ n
+  show (EMIntInt n) = "EMINT_" ++ n
 
 namespace Field
   name : Field -> VarName
@@ -57,15 +57,6 @@ namespace Field
   update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
   update f fun = write f (fun !(read f))
 
-  defVal : (f: Field) -> InterpField f
-  defVal (EInt _) = 0
-
-  serialize : (f : Field) -> InterpField f -> String
-  serialize (EInt _) = show
-
-  deserialize : (f : Field) -> String -> InterpField f
-  deserialize (EInt _)  = prim__fromStrInt 
-
 namespace MapField
   read : (f : MapField) -> (InterpMapKey f) -> Eff (InterpMapVal f) [STORE]
   read f k = call $ ReadMap f k
@@ -75,13 +66,4 @@ namespace MapField
 
   update : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f -> InterpMapVal f) -> Eff () [STORE]
   update f k fun = write f k (fun !(read f k))
-
-  defVal : (f: MapField) -> InterpMapVal f
-  defVal (EMIntInt _) = 0
-
-  serialize : (f : MapField) -> InterpMapVal f -> String
-  serialize (EMIntInt _) = show
-
-  deserialize : (f : MapField) -> String -> InterpMapVal f
-  deserialize (EMIntInt _)  = prim__fromStrInt 
 
