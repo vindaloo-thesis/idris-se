@@ -73,6 +73,9 @@ namespace MapField
   write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> Eff () [STORE]
   write f k x = call (WriteMap f k x)
 
+  write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f -> InterpMapVal f) -> Eff () [STORE]
+  write f k fun = write f (fun !(read f k))
+
   defVal : (f: MapField) -> InterpMapVal f
   defVal (EMIntInt _) = 0
 
