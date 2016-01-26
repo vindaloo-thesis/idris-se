@@ -11,7 +11,7 @@ Executable idris-codegen-se
   Main-is:        Main.hs
   hs-source-dirs: src
 
-  Build-depends:  idris
+  Build-depends:  idris >= 0.10
                 , base
                 , containers
                 , directory
@@ -19,6 +19,7 @@ Executable idris-codegen-se
                 , haskeline >= 0.7
                 , mtl
                 , transformers
+                , text
 
   other-modules: IRTS.CodegenSe
 

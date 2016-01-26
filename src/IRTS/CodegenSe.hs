@@ -8,6 +8,7 @@ import Idris.Core.TT
 import Data.Maybe
 import Data.Char
 import Data.List
+import Data.Text (unpack)
 
 codegenSe :: CodeGenerator
 codegenSe ci = do let out = concatMap doCodegen (simpleDecls ci)
@@ -259,9 +260,42 @@ cgOp LStrConcat [l,r] = "idris_append(" ++ l ++ ", " ++ r ++ ")"
 cgOp LStrCons [l,r] = "idris_append(chr(" ++ l ++ "), " ++ r ++ ")"
 cgOp (LStrInt _) [x] = x
 -}
-cgOp op@(LExternal n) _ | show n == "Ethereum.SIO.prim__value" = "msg.value"
+cgOp op@(LExternal n) args = cgEthereumPrim n args 
 cgOp op exps = "0 #error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
    -- error("Operator " ++ show op ++ " not implemented")
 
+--primitiveOps :: Map String String
+--primitiveOps = fromList
+--  [("prim__value"       , "msg.value")
+--  ,("prim__selfbalance" , "self.balance")
+--  ,("prim__balance"     , "balance") : Address -> Int
+--  ,("prim__send"        , "") : Address -> Int -> ()
+--  ,("prim__remainingGas", "") : Int
+--  ,("prim__timestamp"   , "") : Int
+--  ,("prim__coinbase"    , "") : Address
+--  ]
 
+cgEthereumPrim :: Name -> [String] -> String
+cgEthereumPrim (NS (UN t) _) args = case unpack t of
+  "prim__value"        -> "msg.value"
+  "prim__selfbalance"  -> "self.balance"
+  "prim__balance"      -> head args ++ ".balance"
+  "prim__send"         -> head args ++ ".send(" ++ (args !! 1) ++ ")"
+  "prim__remainingGas" -> "msg.gas"
+  "prim__timestamp"    -> "block.timestamp"
+  "prim__coinbase"     -> "block.coinbase"
 
+cgName :: Name -> String
+cgName (UN t) = show t
+--cgName (NS n ts) = intercalate "." (map show ts) ++ '.' : cgName n
+cgName _ = "UNIMPLEMENTED CASE in cgName"
+
+{-
+%extern prim__value        : Int
+%extern prim__selfbalance  : Int
+%extern prim__balance      : Address -> Int
+%extern prim__send         : Address -> Int -> ()
+%extern prim__remainingGas : Int
+%extern prim__timestamp    : Int
+%extern prim__coinbase     : Address
+-}

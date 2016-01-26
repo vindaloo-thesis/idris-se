@@ -9,8 +9,13 @@ import Ethereum.Environment
 %default total
 %access public
 
-%extern prim__value : Nat
-%extern prim__balance : Nat
+%extern prim__value        : Int
+%extern prim__selfbalance  : Int
+%extern prim__balance      : Address -> Int
+%extern prim__send         : Address -> Int -> ()
+%extern prim__remainingGas : Int
+%extern prim__timestamp    : Int
+%extern prim__coinbase     : Address
 
 unRaw : FFI_C.Raw a -> a
 unRaw (MkRaw x) = x
@@ -64,7 +69,25 @@ contractBalance = toNat <$> foreign FFI_Se "self.balance" (SIO Int)
 
 timestamp : SIO Nat
 timestamp = toNat <$> foreign FFI_Se "block.timestamp" (SIO Int)
+{-
+%extern prim__readVal  : VarName -> a
+%extern prim__writeVal : VarName -> a -> ()
 
+readVal : (f : Field) -> InterpField f
+readVal f = prim__readVal . name $ f
+
+writeVal : (f : Field) -> InterpField f -> ()
+writeVal f val = prim__writeVal (name f) val
+
+mapToField : (m : MapField) -> InterpMapKey m -> Field
+mapToField m key = name m ++ show key
+
+readMap : (m : MapField) -> InterpMapKey m -> InterpMapVal m
+readMap m key = readVal $ mapToField m key
+
+writeMap : (m : MapField) -> InterpMapKey m -> InterpMapVal m -> ()
+writeMap m key val = writeVal (mapToField m key) val
+-}
 -- Store
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
@@ -81,7 +104,7 @@ se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> In
 ---------------------
 -- Effect Handlers --
 ---------------------
-
+{-
 instance Handler EnvRules SIO where
   handle state@(MkE c _ _) ContractAddress k = k c state
   handle state@(MkE _ s _) Sender          k = k s state
@@ -95,7 +118,17 @@ instance Handler EnvRules SIO where
   handle state@(MkE _ _ o) Coinbase        k = do
     cb <- coinbase
     k cb state
+-}
 
+Handler EnvRules c where
+  handle state@(MkE c _ _) ContractAddress k = k c state
+  handle state@(MkE _ s _) Sender          k = k s state
+  handle state@(MkE _ _ o) Origin          k = k o state
+  handle state             RemainingGas    k = k (toNat prim__remainingGas) state
+  handle state             TimeStamp       k = k (toNat prim__timestamp) state
+  handle state             Coinbase        k = k prim__coinbase state
+
+{-
 instance Handler EtherRules SIO where
   handle state@(MkS v _ _ _) Value           k = k v state
   handle state@(MkS _ b _ _) ContractBalance k = k b state
@@ -106,7 +139,15 @@ instance Handler EtherRules SIO where
   handle (MkS v b t s) (Send a r)  k = do
     send r a
     k () (MkS v b (t+a) s)
+-}
 
+Handler EtherRules c where
+  handle state@(MkS v _ _ _) Value           k = k v state
+  handle state@(MkS _ b _ _) ContractBalance k = k b state
+  handle state               (Balance a)     k = k (toNat . prim__balance $ a) state
+  handle (MkS v b t s)       (Save a)        k = k () (MkS v b t (s+a))
+  handle (MkS v b t s)       (Send a r)      k = k (prim__send r $ toIntNat a) (MkS v b (t+a) s)
+{-
 instance Handler Store SIO where
   handle s (Read field)             k = do
       val <- se_read field
@@ -120,4 +161,18 @@ instance Handler Store SIO where
   handle s (WriteMap field key val) k = do
       se_writeMap field key val
       k () s
+-}
 
+Handler Store SIO where
+  handle s (Read field)             k = do
+      val <- se_read field
+      k val s
+  handle s (Write field val)        k = do
+      se_write field val
+      k () s
+  handle s (ReadMap field key)      k = do
+      val <- se_readMap field key
+      k val s
+  handle s (WriteMap field key val) k = do
+      se_writeMap field key val
+      k () s
