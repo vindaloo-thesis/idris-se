@@ -10,3 +10,6 @@ import Effect.Default
 Address : Type
 Address = Int
 
+implicit natInt : Nat -> Int
+natInt = toIntNat
+
