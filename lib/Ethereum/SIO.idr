@@ -83,6 +83,7 @@ se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMap
 
 se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
 se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Int -> SIO ()) n k val
+se_writeMap (EMAddressInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Int -> SIO ()) n k val
 
 ---------------------
 -- Effect Handlers --
