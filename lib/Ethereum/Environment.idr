@@ -5,13 +5,13 @@ import Ethereum.Types
 
 -------------- EFFECT --------------
 data Env : Address -> Address -> Address -> Type where
-  MkE : (cAddr: Address)  -> -- Address of this contract
+  MkE : (self: Address)   -> -- Address of this contract
         (sender: Address) -> -- Sender of transaction (current call)
         (origin: Address) -> -- Origin of transaction (full call chain)
-        Env cAddr sender origin
+        Env self sender origin
 
 data EnvRules : Effect where
-  ContractAddress : sig EnvRules Address (Env c s o)
+  Self            : sig EnvRules Address (Env c s o)
   Sender          : sig EnvRules Address (Env c s o)
   Origin          : sig EnvRules Address (Env c s o)
   RemainingGas    : sig EnvRules Nat (Env c s o)
@@ -21,8 +21,8 @@ data EnvRules : Effect where
 ENV : Address -> Address -> Address -> EFFECT
 ENV c s o = MkEff (Env c s o) EnvRules
 
-contractAddress : Eff Address [ENV c s o]
-contractAddress = call $ ContractAddress
+self : Eff Address [ENV c s o]
+self = call $ Self
 
 sender : Eff Address [ENV c s o]
 sender = call $ Sender
@@ -38,5 +38,4 @@ timeStamp = call $ TimeStamp
 
 coinbase : Eff Address [ENV c s o]
 coinbase = call $ Coinbase
-
 
