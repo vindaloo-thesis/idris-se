@@ -6,7 +6,7 @@ import Ethereum.Store
 import Ethereum.Ether
 import Ethereum.Environment
 
-instance Handler EnvRules IO where
+Handler EnvRules IO where
   handle state@(MkE c _ _) ContractAddress k = k c state
   handle state@(MkE _ s _) Sender          k = k s state
   handle state@(MkE _ _ o) Origin          k = k o state
@@ -14,7 +14,7 @@ instance Handler EnvRules IO where
   handle state TimeStamp                   k = k 1453299096 state
   handle state@(MkE _ _ o) Coinbase        k = k o state
 
-instance Handler EtherRules IO where
+Handler EtherRules IO where
   handle state@(MkS v _ _ _) Value           k = k v   state
   handle state@(MkS _ b _ _) ContractBalance k = k b   state
   handle state               (Balance a)     k = k 100 state
@@ -23,7 +23,33 @@ instance Handler EtherRules IO where
   handle (MkS v b t s)       (Send a r) k = do putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
                                                k () (MkS v b (t+a) s)
 
-instance Handler Store IO where
+namespace Field
+  private
+  serialize : (f : Field) -> InterpField f -> String
+  serialize (EInt _) = show
+
+  private
+  deserialize : (f : Field) -> String -> InterpField f
+  deserialize (EInt _)  = prim__fromStrInt 
+
+  private 
+  defVal : (f: Field) -> InterpField f
+  defVal (EInt _) = 0
+
+namespace MapField
+  private
+  serialize : (f : MapField) -> InterpMapVal f -> String
+  serialize (EMIntInt _) = show
+
+  private
+  deserialize : (f : MapField) -> String -> InterpMapVal f
+  deserialize (EMIntInt _)  = prim__fromStrInt 
+
+  private
+  defVal : (f: MapField) -> InterpMapVal f
+  defVal (EMIntInt _) = 0
+
+Handler Store IO where
   handle s (Read field)     k =
     do
       f <- readFile $ show field

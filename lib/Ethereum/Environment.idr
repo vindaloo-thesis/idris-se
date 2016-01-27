@@ -4,11 +4,10 @@ import Effects
 import Ethereum.Types
 
 -------------- EFFECT --------------
-
 data Env : Address -> Address -> Address -> Type where
-  MkE : (cAddr: Address)  ->
-        (sender: Address) ->
-        (origin: Address) ->
+  MkE : (cAddr: Address)  -> -- Address of this contract
+        (sender: Address) -> -- Sender of transaction (current call)
+        (origin: Address) -> -- Origin of transaction (full call chain)
         Env cAddr sender origin
 
 data EnvRules : Effect where

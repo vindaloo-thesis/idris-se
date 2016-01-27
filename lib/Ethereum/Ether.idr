@@ -3,25 +3,30 @@ module Ethereum.Ether
 import Effects
 import Ethereum.Types
 
------------- TYPES -----------------
-data Commit a = Comm a
-
 -------------- EFFECT --------------
-
 data Ether : Nat -> Nat -> Nat -> Nat -> Type where
-  MkS : (value: Nat) -> (balance: Nat) -> (trans: Nat) -> (saved: Nat) -> Ether value balance trans saved
+  MkS : (value: Nat)   -> -- Incoming ether (call)
+        (balance: Nat) -> -- Ingoing contract balance (call)
+        (trans: Nat)   -> -- Ether sent in outgoing transactions
+        (saved: Nat)   -> -- Part of incoming ether explicitly saved to contract
+        Ether value balance trans saved
 
 data EtherRules : Effect where
-  Value   : sig EtherRules Nat
+  -- Incoming ether (call)
+  Value   : sig EtherRules Nat 
             (Ether v b t s)
-  Balance : Address -> sig EtherRules Nat
-            (Ether v b t s)
+  -- Ingoing contract balance (call)
   ContractBalance : sig EtherRules Nat
             (Ether v b t s)
+  -- Balance of a given address
+  Balance : Address -> sig EtherRules Nat
+            (Ether v b t s)
+  -- Explicitly save amount of incoming ether
   Save    : (a : Nat) -> 
             sig EtherRules ()
             (Ether v b t s)
             (Ether v b t (s+a))
+  -- Send ether to address
   Send    : (a : Nat) ->
             (r : Address) ->
             sig EtherRules ()

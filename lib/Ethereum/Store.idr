@@ -14,11 +14,11 @@ VarName = String
 data Field    = EInt VarName 
 data MapField = EMIntInt VarName 
 
-instance Show Field where
+Show Field where
   show (EInt n)     = "EINT_" ++ n
 
-instance Show MapField where
-  show (EMIntInt n)     = "EMINT_" ++ n
+Show MapField where
+  show (EMIntInt n) = "EMINT_" ++ n
 
 namespace Field
   name : Field -> VarName
@@ -28,10 +28,6 @@ namespace MapField
   name : MapField -> VarName
   name (EMIntInt n) = n
 
---Schema definition
-Schema : Nat -> Type
-Schema k = Vect k Field
-
 InterpField : Field -> Type
 InterpField (EInt _) = Int
 
@@ -40,10 +36,6 @@ InterpMapKey (EMIntInt _) = Int
 
 InterpMapVal : MapField -> Type
 InterpMapVal (EMIntInt _) = Int
-
--- Interpretation function: takes Schema and creates type
-Interp : Schema k -> Type
-Interp schema = HVect (map InterpField schema)
 
 ---- EFFECT ----
 data Store : Effect where
@@ -65,15 +57,6 @@ namespace Field
   update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
   update f fun = write f (fun !(read f))
 
-  defVal : (f: Field) -> InterpField f
-  defVal (EInt _) = 0
-
-  serialize : (f : Field) -> InterpField f -> String
-  serialize (EInt _) = show
-
-  deserialize : (f : Field) -> String -> InterpField f
-  deserialize (EInt _)  = prim__fromStrInt 
-
 namespace MapField
   read : (f : MapField) -> (InterpMapKey f) -> Eff (InterpMapVal f) [STORE]
   read f k = call $ ReadMap f k
@@ -81,12 +64,6 @@ namespace MapField
   write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> Eff () [STORE]
   write f k x = call (WriteMap f k x)
 
-  defVal : (f: MapField) -> InterpMapVal f
-  defVal (EMIntInt _) = 0
-
-  serialize : (f : MapField) -> InterpMapVal f -> String
-  serialize (EMIntInt _) = show
-
-  deserialize : (f : MapField) -> String -> InterpMapVal f
-  deserialize (EMIntInt _)  = prim__fromStrInt 
+  update : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f -> InterpMapVal f) -> Eff () [STORE]
+  update f k fun = write f k (fun !(read f k))
 

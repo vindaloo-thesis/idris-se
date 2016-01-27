@@ -10,7 +10,7 @@ https://github.com/vindaloo-thesis/examples
 
 Build and install
 -----------------
-Tested with [Idris](https://github.com/idris-lang/Idris-dev/) version 0.9.20.1. Idris needs to be built with FFI support.
+Tested with [Idris](https://github.com/idris-lang/Idris-dev/) version 0.10. Idris needs to be built with FFI support.
 
     cabal install
     cd lib && idris --build ethereum.ipkg -i lib --interface; cd ..
