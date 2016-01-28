@@ -12,14 +12,15 @@ VarName : Type
 VarName = String
 
 data Field    = EInt VarName 
-data MapField = EMIntInt VarName | EMAddressInt VarName
+data MapField = EMIntInt VarName | EMAddressInt VarName | EMIntAddress VarName
 
 Show Field where
   show (EInt n)     = "EINT_" ++ n
 
 Show MapField where
-  show (EMIntInt n) = "EMINT_" ++ n
-  show (EMAddressInt n) = "EMADDR_" ++ n
+  show (EMIntInt n) = "EMII_" ++ n
+  show (EMAddressInt n) = "EMAI_" ++ n
+  show (EMIntAddress n) = "EMIA_" ++ n
 
 namespace Field
   name : Field -> VarName
@@ -29,6 +30,7 @@ namespace MapField
   name : MapField -> VarName
   name (EMIntInt n) = n
   name (EMAddressInt n) = n
+  name (EMIntAddress n) = n
 
 InterpField : Field -> Type
 InterpField (EInt _) = Int
@@ -36,10 +38,12 @@ InterpField (EInt _) = Int
 InterpMapKey : MapField -> Type
 InterpMapKey (EMIntInt _)     = Int
 InterpMapKey (EMAddressInt _) = Address
+InterpMapKey (EMIntAddress _) = Int
 
 InterpMapVal : MapField -> Type
 InterpMapVal (EMIntInt _)    = Int
 InterpMapVal (EMAddressInt _) = Int
+InterpMapVal (EMIntAddress _) = Address
 
 ---- EFFECT ----
 data Store : Effect where

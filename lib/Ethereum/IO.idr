@@ -39,18 +39,21 @@ namespace Field
 namespace MapField
   private
   serialize : (f : MapField) -> InterpMapVal f -> String
-  serialize (EMIntInt _) = show
+  serialize (EMIntInt _)     = show
   serialize (EMAddressInt _) = show
+  serialize (EMIntAddress _) = show
 
   private
   deserialize : (f : MapField) -> String -> InterpMapVal f
-  deserialize (EMIntInt _)  = prim__fromStrInt 
+  deserialize (EMIntInt _)      = prim__fromStrInt 
   deserialize (EMAddressInt _)  = prim__fromStrInt 
+  deserialize (EMIntAddress _)  = prim__fromStrInt 
 
   private
   defVal : (f: MapField) -> InterpMapVal f
-  defVal (EMIntInt _) = 0
+  defVal (EMIntInt _)     = 0
   defVal (EMAddressInt _) = 0
+  defVal (EMIntAddress _) = 0
 
 Handler Store IO where
   handle s (Read field)     k =
