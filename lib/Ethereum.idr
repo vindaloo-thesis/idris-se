@@ -1,8 +1,7 @@
 module Ethereum
 
 
-import Effects
-import Effect.State
+import public Effects
 import public Ethereum.Types
 import public Ethereum.Store
 import public Ethereum.Ether
