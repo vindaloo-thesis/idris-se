@@ -5,7 +5,7 @@ import Data.HVect
 import Effects
 import Ethereum.Types
 
-%default total
+-- %default total
 
 ---- TYPES ----
 VarName : Type

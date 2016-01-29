@@ -8,4 +8,4 @@ modules = Ethereum
 	, Ethereum.Ether
 	, Ethereum.Environment
 
-opts = "-p effects"
+opts = "-p effects --total"

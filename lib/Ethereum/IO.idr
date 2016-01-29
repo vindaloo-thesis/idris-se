@@ -1,10 +1,12 @@
 module Ethereum.IO
 
-import Effects
-import Ethereum.Types
-import Ethereum.Store
-import Ethereum.Ether
-import Ethereum.Environment
+import public Effects
+import public Ethereum.Types
+import public Ethereum.Store
+import public Ethereum.Ether
+import public Ethereum.Environment
+
+%default total
 
 Handler EnvRules IO where
   handle state@(MkE c _ _) Self     k = k c state
@@ -24,32 +26,32 @@ Handler EtherRules IO where
                                                k () (MkS v b (t+a) s)
 
 namespace Field
-  private
+  --private
   serialize : (f : Field) -> InterpField f -> String
   serialize (EInt _) = show
 
-  private
+  --private
   deserialize : (f : Field) -> String -> InterpField f
   deserialize (EInt _)  = prim__fromStrInt 
 
-  private 
+  --private 
   defVal : (f: Field) -> InterpField f
   defVal (EInt _) = 0
 
 namespace MapField
-  private
+  --private
   serialize : (f : MapField) -> InterpMapVal f -> String
   serialize (EMIntInt _)     = show
   serialize (EMAddressInt _) = show
   serialize (EMIntAddress _) = show
 
-  private
+  --private
   deserialize : (f : MapField) -> String -> InterpMapVal f
   deserialize (EMIntInt _)      = prim__fromStrInt 
   deserialize (EMAddressInt _)  = prim__fromStrInt 
   deserialize (EMIntAddress _)  = prim__fromStrInt 
 
-  private
+  --private
   defVal : (f: MapField) -> InterpMapVal f
   defVal (EMIntInt _)     = 0
   defVal (EMAddressInt _) = 0

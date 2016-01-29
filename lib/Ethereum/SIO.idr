@@ -1,10 +1,10 @@
 module Ethereum.SIO
 
-import Effects
-import Ethereum.Types
-import Ethereum.Store
-import Ethereum.Ether
-import Ethereum.Environment
+import public Effects
+import public Ethereum.Types
+import public Ethereum.Store
+import public Ethereum.Ether
+import public Ethereum.Environment
 
 %default total
 %access public
@@ -13,6 +13,10 @@ import Ethereum.Environment
 %extern prim__selfbalance  : Nat
 %extern prim__balance      : Address -> Nat
 %extern prim__send         : Address -> Nat -> ()
+
+%extern prim__self         : Address
+%extern prim__sender       : Address
+%extern prim__origin       : Address
 %extern prim__remainingGas : Nat
 %extern prim__timestamp    : Nat
 %extern prim__coinbase     : Address
@@ -42,35 +46,6 @@ SIO : Type -> Type
 SIO = IO' FFI_Se
 
 -- TODO: prim__ rather than FFI
--- Ether
-value : SIO Nat
-value = toNat <$> foreign FFI_Se "msg.value" (SIO Int)
-
-balance : Address -> SIO Int
-balance a = foreign FFI_Se "getBalance" (Address -> SIO Int) a
-
-send : Address -> Nat -> SIO ()
-send a n = foreign FFI_Se "send" (Address -> Int -> SIO ()) a (toIntNat n)
-
-sender : SIO Address
-sender = foreign FFI_Se "msg.sender" (SIO Int)
-
--- Environment
-self : SIO Address
-self = foreign FFI_Se "self" (SIO Address)
-
-coinbase : SIO Address
-coinbase = foreign FFI_Se "block.coinbase" (SIO Address)
-
-remainingGas : SIO Nat
-remainingGas = toNat <$> foreign FFI_Se "msg.gas" (SIO Int)
-
-contractBalance : SIO Nat
-contractBalance = toNat <$> foreign FFI_Se "self.balance" (SIO Int)
-
-timestamp : SIO Nat
-timestamp = toNat <$> foreign FFI_Se "block.timestamp" (SIO Int)
-
 -- Store
 se_read : (f : Field) -> SIO (InterpField f)
 se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)

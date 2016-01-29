@@ -260,20 +260,9 @@ cgOp LStrConcat [l,r] = "idris_append(" ++ l ++ ", " ++ r ++ ")"
 cgOp LStrCons [l,r] = "idris_append(chr(" ++ l ++ "), " ++ r ++ ")"
 cgOp (LStrInt _) [x] = x
 -}
-cgOp op@(LExternal n) args = cgEthereumPrim n args 
+cgOp op@(LExternal n) args = cgEthereumPrim n args
 cgOp op exps = "0 #error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
    -- error("Operator " ++ show op ++ " not implemented")
-
---primitiveOps :: Map String String
---primitiveOps = fromList
---  [("prim__value"       , "msg.value")
---  ,("prim__selfbalance" , "self.balance")
---  ,("prim__balance"     , "balance") : Address -> Int
---  ,("prim__send"        , "") : Address -> Int -> ()
---  ,("prim__remainingGas", "") : Int
---  ,("prim__timestamp"   , "") : Int
---  ,("prim__coinbase"    , "") : Address
---  ]
 
 cgEthereumPrim :: Name -> [String] -> String
 cgEthereumPrim (NS (UN t) _) args = case unpack t of
@@ -284,6 +273,14 @@ cgEthereumPrim (NS (UN t) _) args = case unpack t of
   "prim__remainingGas" -> "msg.gas"
   "prim__timestamp"    -> "block.timestamp"
   "prim__coinbase"     -> "block.coinbase"
+  "prim__self"         -> "self"
+  "prim__sender"       -> "msg.sender"
+  "prim__origin"       -> "tx.origin"
+  "prim__gasprice"     -> "tx.gasprice"
+  "prim__prevhash"     -> "block.prevhash"
+  "prim__difficulty"   -> "block.difficulty"
+  "prim__blocknumber"  -> "block.number"
+  "prim__gaslimit"     -> "block.gaslimit"
 
 cgName :: Name -> String
 cgName (UN t) = show t
