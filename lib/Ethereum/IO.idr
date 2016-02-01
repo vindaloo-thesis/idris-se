@@ -85,10 +85,10 @@ Handler Store IO where
 
   handle s (ReadMap field key) k =
     do
-      f <- readFile $ show field
+      f <- readFile $ show field ++ serialize field key
       case f of
            Right val => do
-             putStrLn $ "- Read " ++ show field ++ ": " ++ trim val
+             putStrLn $ "- Read " ++ show field ++ "["++ serialize field key ++"]: " ++ trim val
              k (deserialize field val) s
            Left _ => do
              putStrLn $ "Error reading file for " ++ show field 
