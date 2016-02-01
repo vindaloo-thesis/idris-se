@@ -38,7 +38,7 @@ namespace Field
   defVal : (f: Field) -> InterpField f
   defVal (EInt _) = 0
 
-namespace MapField
+namespace MapFieldVal
   --private
   serialize : (f : MapField) -> InterpMapVal f -> String
   serialize (EMIntInt _)     = show
@@ -56,6 +56,14 @@ namespace MapField
   defVal (EMIntInt _)     = 0
   defVal (EMAddressInt _) = 0
   defVal (EMIntAddress _) = 0
+
+namespace MapFieldKey
+  --private
+  serialize : (f : MapField) -> InterpMapKey f -> String
+  serialize (EMIntInt _)     = show
+  serialize (EMAddressInt _) = show
+  serialize (EMIntAddress _) = show
+
 
 Handler Store IO where
   handle s (Read field)     k =
@@ -88,7 +96,7 @@ Handler Store IO where
              
   handle s (WriteMap field key val) k =
     do
-      putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
-      writeFile (show field) (serialize field val)
+      putStrLn $ "- Write " ++ show field ++ "["++ serialize field key ++"] = " ++ serialize field val 
+      writeFile (show field ++ serialize field key) (serialize field val)
       k () s
 
