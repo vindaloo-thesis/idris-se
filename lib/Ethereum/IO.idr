@@ -80,7 +80,7 @@ Handler Store IO where
   handle s (Write field val) k =
     do
       putStrLn $ "- " ++ name field ++ " = " ++ serialize field val 
-      writeFile (show field) (serialize field val)
+      writeFile (show field) (serialize field val ++ "\n")
       k () s
 
   handle s (ReadMap field key) k =
@@ -97,6 +97,6 @@ Handler Store IO where
   handle s (WriteMap field key val) k =
     do
       putStrLn $ "- " ++ name field ++ "["++ serialize field key ++"] = " ++ serialize field val 
-      writeFile (show field ++ serialize field key) (serialize field val)
+      writeFile (show field ++ serialize field key) (serialize field val ++ "\n")
       k () s
 
