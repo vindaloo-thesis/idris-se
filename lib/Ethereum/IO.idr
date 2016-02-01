@@ -19,10 +19,10 @@ Handler EnvRules IO where
 Handler EtherRules IO where
   handle state@(MkS v _ _ _) Value           k = k v   state
   handle state@(MkS _ b _ _) ContractBalance k = k b   state
-  handle state               (Balance a)     k = k 100 state
-  handle (MkS v b t s)       (Save a)        k = do putStrLn $ "- Saved " ++ show a
+  handle state               (Balance a)     k = k 100 state --Dummy value
+  handle (MkS v b t s)       (Save a)        k = do putStrLn $ "- Save " ++ show a ++ " wei"
                                                     k () (MkS v b t (s+a))
-  handle (MkS v b t s)       (Send a r) k = do putStrLn $ "- Sent  " ++ show a ++ " to " ++ show r
+  handle (MkS v b t s)       (Send a r) k = do putStrLn $ "- " ++ show a ++ " wei => " ++ show r
                                                k () (MkS v b (t+a) s)
 
 namespace Field
@@ -71,15 +71,15 @@ Handler Store IO where
       f <- readFile $ show field
       case f of
            Right val => do
-             putStrLn $ "- Read " ++ show field ++ ": " ++ trim val
+             putStrLn $ "- " ++ name field ++ ": " ++ trim val
              k (deserialize field val) s
            Left _ => do
-             putStrLn $ "Error reading file for " ++ show field 
+             putStrLn $ "- " ++ name field ++ ": Default " ++ serialize field (defVal field)
              k (defVal field) s
                   
   handle s (Write field val) k =
     do
-      putStrLn $ "- Write " ++ show field ++ " = " ++ serialize field val 
+      putStrLn $ "- " ++ name field ++ " = " ++ serialize field val 
       writeFile (show field) (serialize field val)
       k () s
 
@@ -88,15 +88,15 @@ Handler Store IO where
       f <- readFile $ show field ++ serialize field key
       case f of
            Right val => do
-             putStrLn $ "- Read " ++ show field ++ "["++ serialize field key ++"]: " ++ trim val
+             putStrLn $ "- " ++ name field ++ "[" ++ serialize field key ++ "]: " ++ trim val
              k (deserialize field val) s
            Left _ => do
-             putStrLn $ "Error reading file for " ++ show field 
+             putStrLn $ "- " ++ name field  ++ "[" ++ serialize field key ++ "]: Default " ++ serialize field (defVal field)
              k (defVal field) s
              
   handle s (WriteMap field key val) k =
     do
-      putStrLn $ "- Write " ++ show field ++ "["++ serialize field key ++"] = " ++ serialize field val 
+      putStrLn $ "- " ++ name field ++ "["++ serialize field key ++"] = " ++ serialize field val 
       writeFile (show field ++ serialize field key) (serialize field val)
       k () s
 
