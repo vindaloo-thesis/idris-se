@@ -42,7 +42,18 @@ cgExport (Export _ffiName _fileName es) = ["#exports:\n"] ++ map cgExportDecl es
 
 cgExportDecl :: Export -> String
 cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show fn ++ "\n"
-cgExportDecl _ = ""  -- ignore everything else. Like Data.
+cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
+  "def " ++ en ++ "(" ++ cgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
+  "  ret = " ++ sename fn ++ "("++ cgArgs (length argTys) ++")\n" ++
+  "  if ret[0] == 0 then:\n    return 0\n  return ret[1][0]\n"
+cgExportDecl _ = "#x"  -- ignore everything else. Like Data.
+
+cgExportArg :: FDesc -> String
+cgExportArg (FCon n) = "FCon"
+cgExportArg (FStr n) = n
+cgExportArg (FUnknown) = "FUnknown"
+cgExportArg (FIO n) = "FIO"
+cgExportArg (FApp n args) = "FApp"
 
 
 shouldSkip :: Name -> Bool
@@ -70,11 +81,14 @@ shouldSkip (UN n) = not $ elem (str n) [
   ]
 shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
+cgArgs :: Int -> String
+cgArgs n = showSep ", " (map loc [1..n])
+
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
   | shouldSkip n = "#"++ showCG n ++"\n"
   | otherwise    = "def " ++ sename n ++ "("
-                    ++ showSep ", " (map (loc . fst) (zip [0..] args)) ++ "): #"++ showCG n ++"\n"
+                    ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
                     ++ cgBody 2 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
         doRet ind str

@@ -42,17 +42,17 @@ SIO = IO' FFI_Se
 %extern prim__timestamp    : Nat
 %extern prim__coinbase     : Address
 
-%extern prim__read : (f : Field) -> SIO (InterpField f)
-%extern prim__write : (f : Field) -> (InterpField f) -> SIO ()
-%extern prim__readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
-%extern prim__writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
+%extern prim__read : (f : Field) -> (InterpField f)
+%extern prim__write : (f : Field) -> (InterpField f) ->  ()
+%extern prim__readMap : (f : MapField) -> InterpMapKey f -> (InterpMapVal f)
+%extern prim__writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> ()
 
 
 ---------------------
 -- Effect Handlers --
 ---------------------
 
-Handler EnvRules SIO where
+Handler EnvRules m where
   handle state@(MkE c _ _) Self         k = k c state
   handle state@(MkE _ s _) Sender       k = k s state
   handle state@(MkE _ _ o) Origin       k = k o state
@@ -60,23 +60,16 @@ Handler EnvRules SIO where
   handle state             TimeStamp    k = k prim__timestamp state
   handle state             Coinbase     k = k prim__coinbase state
 
-Handler EtherRules SIO where
+Handler EtherRules m where
   handle state@(MkS v _ _ _) Value           k = k v state
   handle state@(MkS _ b _ _) ContractBalance k = k b state
-  handle state               (Balance a)     k = k (prim__balance $ a) state
+  handle state               (Balance a)     k = k (prim__balance a) state
   handle (MkS v b t s)       (Save a)        k = k () (MkS v b t (s+a))
   handle (MkS v b t s)       (Send a r)      k = k (prim__send r a) (MkS v b (t+a) s)
 
-Handler Store SIO where
-  handle s (Read field)             k = do
-      val <- prim__read field
-      k val s
-  handle s (Write field val)        k = do
-      prim__write field val
-      k () s
-  handle s (ReadMap field key)      k = do
-      val <- prim__readMap field key
-      k val s
-  handle s (WriteMap field key val) k = do
-      prim__writeMap field key val
-      k () s
+Handler Store m where
+  handle s (Read field)             k = k (prim__read field) s
+  handle s (Write field val)        k = k (prim__write field val) s
+  handle s (ReadMap field key)      k = k (prim__readMap field key) s
+  handle s (WriteMap field key val) k = k (prim__writeMap field key val) s
+
