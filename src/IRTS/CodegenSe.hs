@@ -48,7 +48,7 @@ cgExportDecl _ = ""  -- ignore everything else. Like Data.
 shouldSkip :: Name -> Bool
 shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
   -- Skipped namespaces
-  "__prim", "prim" --, "Ether"
+  "__prim", "prim"
   ]) ns || elem (showCG n) [
   -- Skipped functions
   "Prelude.Bool.&&",
@@ -191,8 +191,4 @@ cgEthereumPrim ind ret "prim__writeMap"         args =
   ret ind ("self.storage [mk] = " ++ (args !! 2))
 
 cgEthereumPrim ind ret n _ =  "ERROR('Unimplemented cgEthereumPrim\')"
-
-cgName :: Name -> String
-cgName (UN t) = show t
-cgName _ = "UNIMPLEMENTED CASE in cgName"
 
