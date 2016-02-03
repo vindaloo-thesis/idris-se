@@ -45,7 +45,7 @@ cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show f
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
   "def " ++ en ++ "(" ++ cgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
   "  ret = " ++ sename fn ++ "("++ cgArgs (length argTys) ++")\n" ++
-  "  if ret[0] == 0 then:\n    return 0\n  return ret[1][0]\n"
+  "  if ret[0] == 0:\n    return 0\n  return ret[1][0]\n\n"
 cgExportDecl _ = "#x"  -- ignore everything else. Like Data.
 
 cgExportArg :: FDesc -> String
