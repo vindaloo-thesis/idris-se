@@ -47,19 +47,24 @@ SIO = IO' FFI_Se
 
 -- TODO: prim__ rather than FFI
 -- Store
-se_read : (f : Field) -> SIO (InterpField f)
-se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
+%extern se_read : (f : Field) -> SIO (InterpField f)
+-- se_read : (f : Field) -> SIO (InterpField f)
+-- se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
 
-se_write : (f : Field) -> (InterpField f) -> SIO ()
-se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
+%extern se_write : (f : Field) -> (InterpField f) -> SIO ()
+--se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
 
-se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
-se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
+%extern se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
+-- se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
+-- se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
 
-se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
+-- %extern se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
+%extern se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
+{-
 se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Int -> SIO ()) n k val
 se_writeMap (EMAddressInt n) k val = foreign FFI_Se "writeMap" (VarName -> Address -> Int -> SIO ()) n k val
 se_writeMap (EMIntAddress n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Address -> SIO ()) n k val
+-}
 
 ---------------------
 -- Effect Handlers --

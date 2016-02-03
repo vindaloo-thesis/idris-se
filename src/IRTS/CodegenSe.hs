@@ -150,6 +150,7 @@ cgBody ind ret (SChkCase e (a:alts))
   where conCase (SConCase _ _ _ _ _) = True
         conCase _ = False
 cgBody ind ret (SConst c) = indent ind ++ (ret ind $ cgConst c)
+cgBody ind ret (SOp (LExternal (NS (UN t) _)) args) = indent ind ++ cgEthereumPrim ind ret (unpack t) (map cgVar args)
 cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
 cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
 cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
@@ -158,10 +159,12 @@ cgBody ind ret (SForeign desc1 desc2 args) = indent ind ++ cgFDesc ind ret desc1
 
 cgFDesc :: Int -> (Int -> String -> String) -> FDesc -> FDesc -> [(FDesc,LVar)] -> String
 cgFDesc ind ret _ (FStr n) args = case n of
+                                    {-
                                     "writeVal"   -> cgVarWrite args
                                     "readVal"    -> ret ind $ cgVarRead args
                                     "writeMap"   -> cgMapWrite ind args
                                     "readMap"    -> cgMapRead ind ret args
+                                    -}
                                     "getBalance" -> ret ind $ (cgVar . snd . head $ args) ++ ".balance"
                                     _            -> ret ind $ n ++ cgFArgs args
 cgFDesc ind _   _ fdesc    _    = "ERROR!!! UNIMPLEMENTED CASE OF cgFDesc: " ++ show fdesc
@@ -170,21 +173,7 @@ cgFArgs :: [(FDesc,LVar)] -> String
 cgFArgs []   = ""
 cgFArgs args = "(" ++ intercalate "," (map (cgVar . snd) args) ++ ")"
 
-cgVarRead :: [(FDesc,LVar)] -> String
-cgVarRead [(_,var)] = "self.storage[" ++ cgVar var ++ "]"
-cgVarRead args      = "ERROR: missing case in cgVarRead" ++ show args
 
-cgVarWrite :: [(FDesc,LVar)] -> String
-cgVarWrite [(_,var),(_,val)] = "self.storage[" ++ cgVar var ++ "] = " ++ cgVar val
-cgVarWrite args              = "ERROR: missing case in cgVarWrite" ++ show args
-
-cgMapRead :: Int -> (Int ->  String ->  String) -> [(FDesc,LVar)] -> String
-cgMapRead ind ret [(_,var),(_,key)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ (ret ind "self.storage[mk]")
-cgMapRead _ _ args              = "ERROR: missing case in cgMapRead" ++ show args
-
-cgMapWrite :: Int -> [(FDesc,LVar)] -> String
-cgMapWrite ind [(_,var),(_,key),(_,val)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ "self.storage[mk] = " ++ cgVar val
-cgMapWrite _ args              = "ERROR: missing case in cgMapWrite" ++ show args
 
 cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
 cgAlt ind ret scr scrvar f (SConstCase t exp)
@@ -260,27 +249,45 @@ cgOp LStrConcat [l,r] = "idris_append(" ++ l ++ ", " ++ r ++ ")"
 cgOp LStrCons [l,r] = "idris_append(chr(" ++ l ++ "), " ++ r ++ ")"
 cgOp (LStrInt _) [x] = x
 -}
-cgOp op@(LExternal n) args = cgEthereumPrim n args
+-- cgOp op@(LExternal n) args = cgEthereumPrim n args
 cgOp op exps = "0 #error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
    -- error("Operator " ++ show op ++ " not implemented")
 
-cgEthereumPrim :: Name -> [String] -> String
-cgEthereumPrim (NS (UN t) _) args = case unpack t of
-  "prim__value"        -> "msg.value"
-  "prim__selfbalance"  -> "self.balance"
-  "prim__balance"      -> head args ++ ".balance"
-  "prim__send"         -> head args ++ ".send(" ++ (args !! 1) ++ ")"
-  "prim__remainingGas" -> "msg.gas"
-  "prim__timestamp"    -> "block.timestamp"
-  "prim__coinbase"     -> "block.coinbase"
-  "prim__self"         -> "self"
-  "prim__sender"       -> "msg.sender"
-  "prim__origin"       -> "tx.origin"
-  "prim__gasprice"     -> "tx.gasprice"
-  "prim__prevhash"     -> "block.prevhash"
-  "prim__difficulty"   -> "block.difficulty"
-  "prim__blocknumber"  -> "block.number"
-  "prim__gaslimit"     -> "block.gaslimit"
+cgEthereumPrim :: Int -> (Int -> String -> String) -> String -> [String] -> String
+cgEthereumPrim ind ret "prim__value"        args = ret ind "msg.value"
+cgEthereumPrim ind ret "prim__selfbalance"  args = ret ind $ "self.balance"
+cgEthereumPrim ind ret "prim__balance"      args = ret ind $ head args ++ ".balance"
+cgEthereumPrim ind ret "prim__send"         args = ret ind $ head args ++ ".send(" ++ (args !! 1) ++ ")"
+cgEthereumPrim ind ret "prim__remainingGas" args = ret ind $ "msg.gas"
+cgEthereumPrim ind ret "prim__timestamp"    args = ret ind $ "block.timestamp"
+cgEthereumPrim ind ret "prim__coinbase"     args = ret ind $ "block.coinbase"
+cgEthereumPrim ind ret "prim__self"         args = ret ind $ "self"
+cgEthereumPrim ind ret "prim__sender"       args = ret ind $ "msg.sender"
+cgEthereumPrim ind ret "prim__origin"       args = ret ind $ "tx.origin"
+cgEthereumPrim ind ret "prim__gasprice"     args = ret ind $ "tx.gasprice"
+cgEthereumPrim ind ret "prim__prevhash"     args = ret ind $ "block.prevhash"
+cgEthereumPrim ind ret "prim__difficulty"   args = ret ind $ "block.difficulty"
+cgEthereumPrim ind ret "prim__blocknumber"  args = ret ind $ "block.number"
+cgEthereumPrim ind ret "prim__gaslimit"     args = ret ind $ "block.gaslimit"
+cgEthereumPrim ind ret "se_read"            args = ret ind $ "self.storage[" ++ head args ++ "]"
+cgEthereumPrim ind ret "se_write"           args = ret ind $ "self.storage[" ++ head args ++ "] = " ++ (args !! 1)
+cgEthereumPrim ind ret "se_readMap"         args =
+  indent ind ++ "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
+  indent ind ++ (ret ind "self.storage[mk]")
+cgEthereumPrim ind ret "se_writeMap"         args =
+  indent ind ++ "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
+  ret ind ("self.storage [mk] = " ++ (args !! 2))
+
+cgEthereumPrim ind ret n _ =  "ERROR('Unimplemented cgEthereumPrim\')"
+{-
+cgEthereumPrim ind ret n args = case unpack t of
+  "se_readMap"            ->  cgMapRead ind ret args
+  "se_writeMap"           ->  cgMapWrite ind ret args
+  _                       ->  cgEthereumTrivialPrim (map cgVar args)
+  -}
+
+--cgEthereumTrivialPrim :: Name -> [String] -> String
+--cgEthereumTrivialPrim n args = case unpack t of
 
 cgName :: Name -> String
 cgName (UN t) = show t
@@ -296,3 +303,10 @@ cgName _ = "UNIMPLEMENTED CASE in cgName"
 %extern prim__timestamp    : Int
 %extern prim__coinbase     : Address
 -}
+cgMapRead :: Int -> (Int ->  String ->  String) -> [(FDesc,LVar)] -> String
+cgMapRead ind ret [(_,var),(_,key)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ (ret ind "self.storage[mk]")
+cgMapRead _ _ args              = "ERROR: missing case in cgMapRead" ++ show args
+
+cgMapWrite :: Int -> [(FDesc,LVar)] -> String
+cgMapWrite ind [(_,var),(_,key),(_,val)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ "self.storage[mk] = " ++ cgVar val
+cgMapWrite _ args              = "ERROR: missing case in cgMapWrite" ++ show args
