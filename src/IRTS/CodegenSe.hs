@@ -77,7 +77,9 @@ cgFun n args def
                     ++ showSep ", " (map (loc . fst) (zip [0..] args)) ++ "): #"++ showCG n ++"\n"
                     ++ cgBody 2 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
-        doRet ind str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
+        doRet ind str
+          | head str == '[' && elem ',' str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
+          | otherwise                     = "return " ++ str ++ "\n"
 
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
@@ -90,6 +92,7 @@ cgBody :: Int -> (Int -> String -> String) -> SExp -> String
 cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ sename n ++ "()")
 cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
 cgBody ind ret (SApp _ f args)
+-- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessar overhead of the prim__ functions.
   | otherwise        = indent ind ++ ret ind ("self." ++ sename f ++ "(" ++
                                    showSep ", " (map cgVar args) ++ ")")
 cgBody ind ret (SLet (Loc i) v sc)
