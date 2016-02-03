@@ -14,13 +14,8 @@ codegenSe :: CodeGenerator
 codegenSe ci = do let out = concatMap doCodegen (simpleDecls ci)
                       exports = concat (concatMap cgExport (exportDecls ci))
                   writeFile (outputFile ci) ("\n" ++ helpers ++ "\n" ++
-                                                        out ++ "\n#exports:\n" ++
-                                                        exports ++ "\n#/exports" ++
-                                                        show (length (exportDecls ci)) ++
-                                                        start ++ "\n" ++
-                                              "\n\n")
-
-start = ""
+                                                        out ++ "\n" ++
+                                                        exports ++ "\n")
 
 helpers = "def idris_Prelude_46_Nat_46_toIntNat_58_toIntNat_39__58_0(loc0, loc1, loc2): #Prelude.Nat.toIntNat:toIntNat':0\n  return loc1\n"
 
@@ -41,20 +36,14 @@ indent ind = take (ind*2) $ repeat ' '
 doCodegen :: (Name, SDecl) -> String
 doCodegen (n, SFun _ args i def) = cgFun n args def
 
---EXPORTS START
+--TODO: Real export interface
 cgExport :: ExportIFace -> [String]
-cgExport (Export _ffiName _fileName es) = map cgExportDecl es
+cgExport (Export _ffiName _fileName es) = ["#exports:\n"] ++ map cgExportDecl es ++ ["#/exports\n"]
 
 cgExportDecl :: Export -> String
-cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys)
-    = cgExportFun fn en (length argTys)
+cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show fn ++ "\n"
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
---TODO: Real interfaces?
-cgExportFun :: Name -> String -> Int -> String
-cgExportFun fn en argCnt = "#export: " ++ show fn
-
---EXPORTS END
 
 shouldSkip :: Name -> Bool
 shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
