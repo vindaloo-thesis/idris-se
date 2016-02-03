@@ -169,7 +169,7 @@ cgEthereumPrim :: Int -> (Int -> String -> String) -> String -> [String] -> Stri
 cgEthereumPrim ind ret "prim__value"        args = ret ind "msg.value"
 cgEthereumPrim ind ret "prim__selfbalance"  args = ret ind $ "self.balance"
 cgEthereumPrim ind ret "prim__balance"      args = ret ind $ head args ++ ".balance"
-cgEthereumPrim ind ret "prim__send"         args = ret ind $ head args ++ ".send(" ++ (args !! 1) ++ ")"
+cgEthereumPrim ind ret "prim__send"         args = ret ind $ "send(0, " ++ head args ++ ", " ++ (args !! 1) ++ ")"
 cgEthereumPrim ind ret "prim__remainingGas" args = ret ind $ "msg.gas"
 cgEthereumPrim ind ret "prim__timestamp"    args = ret ind $ "block.timestamp"
 cgEthereumPrim ind ret "prim__coinbase"     args = ret ind $ "block.coinbase"
@@ -182,13 +182,13 @@ cgEthereumPrim ind ret "prim__difficulty"   args = ret ind $ "block.difficulty"
 cgEthereumPrim ind ret "prim__blocknumber"  args = ret ind $ "block.number"
 cgEthereumPrim ind ret "prim__gaslimit"     args = ret ind $ "block.gaslimit"
 cgEthereumPrim ind ret "prim__read"            args = ret ind $ "self.storage[" ++ head args ++ "]"
-cgEthereumPrim ind ret "prim__write"           args = ret ind $ "self.storage[" ++ head args ++ "] = " ++ (args !! 1)
+cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head args ++ "] = " ++ (args !! 1) ++ "\n" ++ indent ind ++ ret ind "0"
 cgEthereumPrim ind ret "prim__readMap"         args =
-  indent ind ++ "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
+  "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
   indent ind ++ (ret ind "self.storage[mk]")
 cgEthereumPrim ind ret "prim__writeMap"         args =
-  indent ind ++ "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
-  ret ind ("self.storage [mk] = " ++ (args !! 2))
+  "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
+   indent ind ++ "self.storage [mk] = " ++ (args !! 2)++"\n" ++ indent ind ++ ret ind "0"
 
 cgEthereumPrim ind ret n _ =  "ERROR('Unimplemented cgEthereumPrim\')"
 
