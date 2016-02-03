@@ -14,8 +14,8 @@ codegenSe :: CodeGenerator
 codegenSe ci = do let out = concatMap doCodegen (simpleDecls ci)
                       exports = concat (concatMap cgExport (exportDecls ci))
                   writeFile (outputFile ci) ("\n" ++ helpers ++ "\n" ++
-                                                        out ++ "\n" ++
-                                                        exports ++ "\n")
+                                                    out ++ "\n" ++
+                                                    exports ++ "\n")
 
 helpers = "def idris_Prelude_46_Nat_46_toIntNat_58_toIntNat_39__58_0(loc0, loc1, loc2): #Prelude.Nat.toIntNat:toIntNat':0\n  return loc1\n"
 
