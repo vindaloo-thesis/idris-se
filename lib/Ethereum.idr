@@ -7,7 +7,7 @@ import public Ethereum.Store
 import public Ethereum.Ether
 import public Ethereum.Environment
 
-%default total
+-- %default total
 %access public
 
 -- Syntax extensions for ETH
