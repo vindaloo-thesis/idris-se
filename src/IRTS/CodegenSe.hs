@@ -50,23 +50,9 @@ cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys)
     = cgExportFun fn en (length argTys)
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
+--TODO: Real interfaces?
 cgExportFun :: Name -> String -> Int -> String
-cgExportFun fn en argCnt
-    = ("#export: " ++ show fn)
-    {-
-    $+$ text "def" <+> cgApp (text en) (map text args) <> colon
-    $+$ indent (
-        cgApp
-            (cgName (sMN 0 "APPLY"))
-            [ cgApp (cgName fn)
-                $ map text args
-            , text "World"
-            ]
-    )
-    $+$ text ""
-  where
-    args = ["arg" ++ show i | i <- [1..argCnt]]
-    -}
+cgExportFun fn en argCnt = "#export: " ++ show fn
 
 --EXPORTS END
 
@@ -104,20 +90,6 @@ cgFun n args def
   where doRet :: Int -> String -> String -- Return the calculated expression
         doRet ind str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
 
-etherApp :: Name -> [String] -> String
-etherApp (NS (UN (t)) _) args = eApp (str t) args where
-  --eApp "save" _ = "[2,[0],[4]] #save "++ head args ++ "\n"
-  --eApp "balance" _ = "self.s.block.balance(" ++ args !! 4 ++ ")\n"
-  --eApp "balance" _ = args !! 4 ++ ".balance\n"
-  --eApp "contractAddress" _ = "self\n"
-  --eApp "sender" _ = "msg.sender"
-  --eApp "send" _ = "send(" ++ (args !! 4) ++ ", " ++ (args !! 5) ++ ")\n"
-  eApp f  args = "UNHANDLED EVM FUNCTION " ++ f ++ "(" ++ showSep ", " args ++ ")\n"
-
-isEthereumPrim :: Name -> Bool
-isEthereumPrim (NS f ns) = any (\x -> str x == "Ether") ns
-isEthereumPrim n         = False
-
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
 --
@@ -129,7 +101,6 @@ cgBody :: Int -> (Int -> String -> String) -> SExp -> String
 cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ sename n ++ "()")
 cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
 cgBody ind ret (SApp _ f args)
---  | isEthereumPrim f = indent ind ++ ret ind (etherApp f (map cgVar args))
   | otherwise        = indent ind ++ ret ind ("self." ++ sename f ++ "(" ++
                                    showSep ", " (map cgVar args) ++ ")")
 cgBody ind ret (SLet (Loc i) v sc)
@@ -154,26 +125,11 @@ cgBody ind ret (SOp (LExternal (NS (UN t) _)) args) = indent ind ++ cgEthereumPr
 cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
 cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
 cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
-cgBody ind ret (SForeign desc1 desc2 args) = indent ind ++ cgFDesc ind ret desc1 desc2 args
-
-
-cgFDesc :: Int -> (Int -> String -> String) -> FDesc -> FDesc -> [(FDesc,LVar)] -> String
-cgFDesc ind ret _ (FStr n) args = case n of
-                                    {-
-                                    "writeVal"   -> cgVarWrite args
-                                    "readVal"    -> ret ind $ cgVarRead args
-                                    "writeMap"   -> cgMapWrite ind args
-                                    "readMap"    -> cgMapRead ind ret args
-                                    -}
-                                    "getBalance" -> ret ind $ (cgVar . snd . head $ args) ++ ".balance"
-                                    _            -> ret ind $ n ++ cgFArgs args
-cgFDesc ind _   _ fdesc    _    = "ERROR!!! UNIMPLEMENTED CASE OF cgFDesc: " ++ show fdesc
+cgBody ind ret (SForeign desc1 desc2 args) = indent ind ++ "ERROR('Unhandled foreign function " ++ show desc1 ++ ", "++ show desc2 ++ ")"
 
 cgFArgs :: [(FDesc,LVar)] -> String
 cgFArgs []   = ""
 cgFArgs args = "(" ++ intercalate "," (map (cgVar . snd) args) ++ ")"
-
-
 
 cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
 cgAlt ind ret scr scrvar f (SConstCase t exp)
@@ -186,19 +142,6 @@ cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
    where project i v [] = "" -- indent (ind+1) ++ "#empty project"
          project i v (n : ns) = indent (ind+1) ++ (loc v ++ " = " ++ scr ++ "[" ++ show i ++ "]\n"
                                   ++ project (i + 1) (v + 1) ns)
-
-{-
-cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
-cgAlt ind ret scr scrvar f (SConstCase t exp)
-   = "case " ++ show t ++ ":\n" ++ cgBody ind ret exp
-cgAlt ind ret scr scrvar f (SDefaultCase exp) = "default:\n" ++ cgBody ind ret exp
-cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
-   = "case " ++ show t ++ ":\n"
-             ++ project 1 lv args ++ "\n" ++ cgBody ind ret exp
-   where project i v [] = ""
-         project i v (n : ns) = loc v ++ " = " ++ scr ++ "[" ++ show i ++ "]; "
-                                  ++ project (i + 1) (v + 1) ns
-                                  -}
 
 cgVar :: LVar -> String
 cgVar (Loc i) = loc i
@@ -231,27 +174,7 @@ cgOp (LSGt (ATInt _)) [l, r]
 cgOp (LSGe (ATInt _)) [l, r]
      = "(" ++ l ++ " >= " ++ r ++ ")"
 cgOp (LSExt _ _) [x] = x
-     {-
-cgOp LStrEq [l,r] = "(" ++ l ++ " == " ++ r ++ ")"
-cgOp LStrRev [x] = "strrev(" ++ x ++ ")"
-cgOp LStrLen [x] = "strlen(utf8_decode(" ++ x ++ "))"
-cgOp LStrHead [x] = "ord(" ++ x ++ "[0])"
-cgOp LStrIndex [x, y] = "ord(" ++ x ++ "[" ++ y ++ "])"
-cgOp LStrTail [x] = "substr(" ++ x ++ ", 1)"
-
-cgOp (LIntStr _) [x] = "\"" ++ x ++ "\""
-cgOp (LChInt _) [x] = x
-cgOp (LIntCh _) [x] = x
-cgOp (LTrunc _ _) [x] = x
-cgOp LWriteStr [_,str] = "idris_writeStr(" ++ str ++ ")"
-cgOp LReadStr [_] = "idris_readStr()"
-cgOp LStrConcat [l,r] = "idris_append(" ++ l ++ ", " ++ r ++ ")"
-cgOp LStrCons [l,r] = "idris_append(chr(" ++ l ++ "), " ++ r ++ ")"
-cgOp (LStrInt _) [x] = x
--}
--- cgOp op@(LExternal n) args = cgEthereumPrim n args
 cgOp op exps = "0 #error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
-   -- error("Operator " ++ show op ++ " not implemented")
 
 cgEthereumPrim :: Int -> (Int -> String -> String) -> String -> [String] -> String
 cgEthereumPrim ind ret "prim__value"        args = ret ind "msg.value"
@@ -269,44 +192,18 @@ cgEthereumPrim ind ret "prim__prevhash"     args = ret ind $ "block.prevhash"
 cgEthereumPrim ind ret "prim__difficulty"   args = ret ind $ "block.difficulty"
 cgEthereumPrim ind ret "prim__blocknumber"  args = ret ind $ "block.number"
 cgEthereumPrim ind ret "prim__gaslimit"     args = ret ind $ "block.gaslimit"
-cgEthereumPrim ind ret "se_read"            args = ret ind $ "self.storage[" ++ head args ++ "]"
-cgEthereumPrim ind ret "se_write"           args = ret ind $ "self.storage[" ++ head args ++ "] = " ++ (args !! 1)
-cgEthereumPrim ind ret "se_readMap"         args =
+cgEthereumPrim ind ret "prim__read"            args = ret ind $ "self.storage[" ++ head args ++ "]"
+cgEthereumPrim ind ret "prim__write"           args = ret ind $ "self.storage[" ++ head args ++ "] = " ++ (args !! 1)
+cgEthereumPrim ind ret "prim__readMap"         args =
   indent ind ++ "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
   indent ind ++ (ret ind "self.storage[mk]")
-cgEthereumPrim ind ret "se_writeMap"         args =
+cgEthereumPrim ind ret "prim__writeMap"         args =
   indent ind ++ "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
   ret ind ("self.storage [mk] = " ++ (args !! 2))
 
 cgEthereumPrim ind ret n _ =  "ERROR('Unimplemented cgEthereumPrim\')"
-{-
-cgEthereumPrim ind ret n args = case unpack t of
-  "se_readMap"            ->  cgMapRead ind ret args
-  "se_writeMap"           ->  cgMapWrite ind ret args
-  _                       ->  cgEthereumTrivialPrim (map cgVar args)
-  -}
-
---cgEthereumTrivialPrim :: Name -> [String] -> String
---cgEthereumTrivialPrim n args = case unpack t of
 
 cgName :: Name -> String
 cgName (UN t) = show t
---cgName (NS n ts) = intercalate "." (map show ts) ++ '.' : cgName n
 cgName _ = "UNIMPLEMENTED CASE in cgName"
 
-{-
-%extern prim__value        : Int
-%extern prim__selfbalance  : Int
-%extern prim__balance      : Address -> Int
-%extern prim__send         : Address -> Int -> ()
-%extern prim__remainingGas : Int
-%extern prim__timestamp    : Int
-%extern prim__coinbase     : Address
--}
-cgMapRead :: Int -> (Int ->  String ->  String) -> [(FDesc,LVar)] -> String
-cgMapRead ind ret [(_,var),(_,key)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ (ret ind "self.storage[mk]")
-cgMapRead _ _ args              = "ERROR: missing case in cgMapRead" ++ show args
-
-cgMapWrite :: Int -> [(FDesc,LVar)] -> String
-cgMapWrite ind [(_,var),(_,key),(_,val)] = "mk = " ++ "'idr_' + " ++ cgVar var ++ " + '_' + " ++ cgVar key ++ "\n" ++ indent ind ++ "self.storage[mk] = " ++ cgVar val
-cgMapWrite _ args              = "ERROR: missing case in cgMapWrite" ++ show args

@@ -9,21 +9,6 @@ import public Ethereum.Environment
 %default total
 %access public
 
-%extern prim__value        : Nat
-%extern prim__selfbalance  : Nat
-%extern prim__balance      : Address -> Nat
-%extern prim__send         : Address -> Nat -> ()
-
-%extern prim__self         : Address
-%extern prim__sender       : Address
-%extern prim__origin       : Address
-%extern prim__remainingGas : Nat
-%extern prim__timestamp    : Nat
-%extern prim__coinbase     : Address
-
-unRaw : FFI_C.Raw a -> a
-unRaw (MkRaw x) = x
-
 -- Supported foreign types
 data SeTypes : Type -> Type where
   -- Primitive types
@@ -45,26 +30,23 @@ FFI_Se = MkFFI SeTypes String String
 SIO : Type -> Type
 SIO = IO' FFI_Se
 
--- TODO: prim__ rather than FFI
--- Store
-%extern se_read : (f : Field) -> SIO (InterpField f)
--- se_read : (f : Field) -> SIO (InterpField f)
--- se_read f = unRaw <$> foreign FFI_Se "readVal" (VarName -> SIO (Raw (InterpField f))) (name f)
+%extern prim__value        : Nat
+%extern prim__selfbalance  : Nat
+%extern prim__balance      : Address -> Nat
+%extern prim__send         : Address -> Nat -> ()
 
-%extern se_write : (f : Field) -> (InterpField f) -> SIO ()
---se_write (EInt n) val = foreign FFI_Se "writeVal" (VarName -> Int -> SIO ()) n val
+%extern prim__self         : Address
+%extern prim__sender       : Address
+%extern prim__origin       : Address
+%extern prim__remainingGas : Nat
+%extern prim__timestamp    : Nat
+%extern prim__coinbase     : Address
 
-%extern se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
--- se_readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
--- se_readMap f k = unRaw <$> foreign FFI_Se "readMap" (VarName -> ( Raw (InterpMapKey f)) -> SIO (Raw (InterpMapVal f))) (name f) (MkRaw k)
+%extern prim__read : (f : Field) -> SIO (InterpField f)
+%extern prim__write : (f : Field) -> (InterpField f) -> SIO ()
+%extern prim__readMap : (f : MapField) -> InterpMapKey f -> SIO (InterpMapVal f)
+%extern prim__writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
 
--- %extern se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
-%extern se_writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> SIO ()
-{-
-se_writeMap (EMIntInt n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Int -> SIO ()) n k val
-se_writeMap (EMAddressInt n) k val = foreign FFI_Se "writeMap" (VarName -> Address -> Int -> SIO ()) n k val
-se_writeMap (EMIntAddress n) k val = foreign FFI_Se "writeMap" (VarName -> Int -> Address -> SIO ()) n k val
--}
 
 ---------------------
 -- Effect Handlers --
@@ -87,14 +69,14 @@ Handler EtherRules SIO where
 
 Handler Store SIO where
   handle s (Read field)             k = do
-      val <- se_read field
+      val <- prim__read field
       k val s
   handle s (Write field val)        k = do
-      se_write field val
+      prim__write field val
       k () s
   handle s (ReadMap field key)      k = do
-      val <- se_readMap field key
+      val <- prim__readMap field key
       k val s
   handle s (WriteMap field key val) k = do
-      se_writeMap field key val
+      prim__writeMap field key val
       k () s
