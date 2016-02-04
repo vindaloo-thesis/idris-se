@@ -45,8 +45,8 @@ cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show f
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
   "def " ++ en ++ "(" ++ cgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
   "  ret = self." ++ sename fn ++ "("++ cgArgs (length argTys) ++")\n" ++
-  "  if ret[0] == 0:\n    return 0\n  return ret[1][0]\n\n"
-cgExportDecl _ = "#x"  -- ignore everything else. Like Data.
+  "  if ret[0] == 0:\n    return 255\n  return ret[1][0]\n\n"
+cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
 cgExportArg :: FDesc -> String
 cgExportArg (FCon n) = "FCon"
@@ -89,7 +89,7 @@ cgFun n args def
   | shouldSkip n = "" -- "#"++ showCG n ++"\n"
   | otherwise    = "def " ++ sename n ++ "("
                     ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
-                    ++ cgBody 2 doRet def ++ "\n\n"
+                    ++ cgBody 1 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
         doRet ind str
           | head str == '[' && elem ',' str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
