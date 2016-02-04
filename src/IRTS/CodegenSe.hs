@@ -28,7 +28,7 @@ var :: Name -> String
 var n = sename n
 
 loc :: Int -> String
-loc i = "loc" ++ show i
+loc i = "v" ++ show i
 
 indent :: Int -> String
 indent ind = take (ind*2) $ repeat ' '
@@ -82,7 +82,7 @@ shouldSkip (UN n) = not $ elem (str n) [
 shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
 cgArgs :: Int -> String
-cgArgs n = showSep ", " (map loc [1..n])
+cgArgs n = showSep ", " (map loc [0..(n-1)])
 
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
