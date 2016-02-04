@@ -33,6 +33,18 @@ loc i = "loc" ++ show i
 indent :: Int -> String
 indent ind = take (ind*2) $ repeat ' '
 
+cgArgs :: Int -> String
+cgArgs n = showSep ", " (map loc [0..(n-1)])
+
+cgArgsCall :: Int -> String
+cgArgsCall n = showSep ", " (map ((\s -> "[" ++ s ++ "]") . loc) [0..(n-1)])
+
+cgArgsArr :: Int -> String
+cgArgsArr n = showSep ", " (map ((\s -> s ++ ":arr") . loc) [0..(n-1)])
+
+cgArgTypes :: [Name] -> String
+cgArgTypes args = showSep ", " (map show args)
+
 doCodegen :: (Name, SDecl) -> String
 doCodegen (n, SFun _ args i def) = cgFun n args def
 
@@ -44,17 +56,9 @@ cgExportDecl :: Export -> String
 cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show fn ++ "\n"
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
   "def " ++ en ++ "(" ++ cgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
-  "  ret = self." ++ sename fn ++ "("++ cgArgs (length argTys) ++")\n" ++
+  "  ret = self." ++ sename fn ++ "("++ cgArgsCall (length argTys) ++", outitems=20)\n" ++
   "  if ret[0] == 0:\n    return 0\n  return ret[1][0]\n\n"
 cgExportDecl _ = "#x"  -- ignore everything else. Like Data.
-
-cgExportArg :: FDesc -> String
-cgExportArg (FCon n) = "FCon"
-cgExportArg (FStr n) = n
-cgExportArg (FUnknown) = "FUnknown"
-cgExportArg (FIO n) = "FIO"
-cgExportArg (FApp n args) = "FApp"
-
 
 shouldSkip :: Name -> Bool
 shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
@@ -81,19 +85,19 @@ shouldSkip (UN n) = not $ elem (str n) [
   ]
 shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
-cgArgs :: Int -> String
-cgArgs n = showSep ", " (map loc [1..n])
-
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
-  | shouldSkip n = "#"++ showCG n ++"\n"
+  | shouldSkip n = "" -- "#"++ showCG n ++"\n"
   | otherwise    = "def " ++ sename n ++ "("
-                    ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
+                    ++ cgArgsArr (length args) ++ "): #"++ showCG n ++"\n"
                     ++ cgBody 2 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
+        {-
         doRet ind str
           | head str == '[' && elem ',' str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
           | otherwise                     = "return " ++ str ++ "\n"
+          -}
+        doRet ind str = "return(" ++ str ++ ":arr)\n"
 
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
@@ -108,7 +112,7 @@ cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
 cgBody ind ret (SApp _ f args)
 -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessar overhead of the prim__ functions.
   | otherwise        = indent ind ++ ret ind ("self." ++ sename f ++ "(" ++
-                                   showSep ", " (map cgVar args) ++ ")")
+                                   showSep ", " (map cgVar args) ++ ", outitems=25)") --TODO: arbitrary
 cgBody ind ret (SLet (Loc i) v sc)
    = cgBody ind (\_ x -> loc i ++ " = " ++ x ++ "\n") v ++
      cgBody ind ret sc
@@ -118,7 +122,7 @@ cgBody ind ret (SProj e i)
    = indent ind ++ (ret ind $ cgVar e ++ "[" ++ show (i + 1) ++ "]")
 cgBody ind ret (SCon _ t n args)
    = indent ind ++ (ret ind $ "[" ++ showSep ","
-              (show t : (map cgVar args)) ++ "]")
+              (("[" ++ show t ++ "]") : (map cgVar args)) ++ "]")
 cgBody ind ret (SCase _ e alts) = cgBody ind ret (SChkCase e alts)
 cgBody ind ret (SChkCase e (a:alts))
    = let scr = cgVar e
@@ -129,7 +133,7 @@ cgBody ind ret (SChkCase e (a:alts))
 cgBody ind ret (SConst c) = indent ind ++ (ret ind $ cgConst c)
 cgBody ind ret (SOp (LExternal (NS (UN t) _)) args) = indent ind ++ cgEthereumPrim ind ret (unpack t) (map cgVar args)
 cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
-cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
+cgBody ind ret SNothing = indent ind ++ (ret ind "[0]")
 cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
 cgBody ind ret (SForeign desc1 desc2 args) = indent ind ++ "ERROR('Unhandled foreign function " ++ show desc1 ++ ", "++ show desc2 ++ ")"
 
@@ -155,57 +159,58 @@ cgVar (Glob n) = var n
 
 cgConst :: Const -> String
 cgConst (I i) = show i
-cgConst (Ch i) = show (ord i) -- Treat Char as ints, because Se treats them as Strings...
-cgConst (BI i) = show i
-cgConst (Str s) = show s
+-- cgConst (I i) = "[" ++ show i ++ "]"
+-- cgConst (Ch i) = show (ord i) -- Treat Char as ints, because Se treats them as Strings...
+-- cgConst (BI i) = show i
+-- cgConst (Str s) = show s
 cgConst TheWorld = "0 #TheWorld"
 cgConst x | isTypeConst x = "0 #TypeConst"
 cgConst x = error $ "Constant " ++ show x ++ " not compilable yet"
 
 cgOp :: PrimFn -> [String] -> String
 cgOp (LPlus (ATInt _)) [l, r]
-     = "(" ++ l ++ " + " ++ r ++ ")"
+     = "[" ++ l ++ "[0] + " ++ r ++ "[0])"
 cgOp (LMinus (ATInt _)) [l, r]
-     = "(" ++ l ++ " - " ++ r ++ ")"
+     = "(" ++ l ++ "[0] - " ++ r ++ "[0])"
 cgOp (LTimes (ATInt _)) [l, r]
-     = "(" ++ l ++ " * " ++ r ++ ")"
+     = "(" ++ l ++ "[0] * " ++ r ++ "[0])"
 cgOp (LEq (ATInt _)) [l, r]
-     = "(" ++ l ++ " == " ++ r ++ ")"
+     = "(" ++ l ++ "[0] == " ++ r ++ "[0])"
 cgOp (LSLt (ATInt _)) [l, r]
-     = "(" ++ l ++ " < " ++ r ++ ")"
+     = "(" ++ l ++ "[0] < " ++ r ++ "[0])"
 cgOp (LSLe (ATInt _)) [l, r]
-     = "(" ++ l ++ " <= " ++ r ++ ")"
+     = "(" ++ l ++ "[0] <= " ++ r ++ "[0])"
 cgOp (LSGt (ATInt _)) [l, r]
-     = "(" ++ l ++ " > " ++ r ++ ")"
+     = "(" ++ l ++ "[0] > " ++ r ++ "[0])"
 cgOp (LSGe (ATInt _)) [l, r]
-     = "(" ++ l ++ " >= " ++ r ++ ")"
+     = "(" ++ l ++ "[0] >= " ++ r ++ "[0])"
 cgOp (LSExt _ _) [x] = x
 cgOp op exps = "0 #error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
 
 cgEthereumPrim :: Int -> (Int -> String -> String) -> String -> [String] -> String
-cgEthereumPrim ind ret "prim__value"        args = ret ind "msg.value"
-cgEthereumPrim ind ret "prim__selfbalance"  args = ret ind $ "self.balance"
-cgEthereumPrim ind ret "prim__balance"      args = ret ind $ head args ++ ".balance"
-cgEthereumPrim ind ret "prim__send"         args = ret ind $ "send(0, " ++ head args ++ ", " ++ (args !! 1) ++ ")"
-cgEthereumPrim ind ret "prim__remainingGas" args = ret ind $ "msg.gas"
-cgEthereumPrim ind ret "prim__timestamp"    args = ret ind $ "block.timestamp"
-cgEthereumPrim ind ret "prim__coinbase"     args = ret ind $ "block.coinbase"
-cgEthereumPrim ind ret "prim__self"         args = ret ind $ "self"
-cgEthereumPrim ind ret "prim__sender"       args = ret ind $ "msg.sender"
-cgEthereumPrim ind ret "prim__origin"       args = ret ind $ "tx.origin"
-cgEthereumPrim ind ret "prim__gasprice"     args = ret ind $ "tx.gasprice"
-cgEthereumPrim ind ret "prim__prevhash"     args = ret ind $ "block.prevhash"
-cgEthereumPrim ind ret "prim__difficulty"   args = ret ind $ "block.difficulty"
-cgEthereumPrim ind ret "prim__blocknumber"  args = ret ind $ "block.number"
-cgEthereumPrim ind ret "prim__gaslimit"     args = ret ind $ "block.gaslimit"
+cgEthereumPrim ind ret "prim__value"        args = ret ind $ "[msg.value]"
+cgEthereumPrim ind ret "prim__selfbalance"  args = ret ind $ "[self.balance]"
+cgEthereumPrim ind ret "prim__balance"      args = ret ind $ "[" ++ head args ++ ".balance]"
+cgEthereumPrim ind ret "prim__send"         args = ret ind $ "[send(0, " ++ head args ++ "[0], " ++ (args !! 1) ++ "[0])]"
+cgEthereumPrim ind ret "prim__remainingGas" args = ret ind $ "[msg.gas]"
+cgEthereumPrim ind ret "prim__timestamp"    args = ret ind $ "[block.timestamp]"
+cgEthereumPrim ind ret "prim__coinbase"     args = ret ind $ "[block.coinbase]"
+cgEthereumPrim ind ret "prim__self"         args = ret ind $ "[self]"
+cgEthereumPrim ind ret "prim__sender"       args = ret ind $ "[msg.sender]"
+cgEthereumPrim ind ret "prim__origin"       args = ret ind $ "[tx.origin]"
+cgEthereumPrim ind ret "prim__gasprice"     args = ret ind $ "[tx.gasprice]"
+cgEthereumPrim ind ret "prim__prevhash"     args = ret ind $ "[block.prevhash]"
+cgEthereumPrim ind ret "prim__difficulty"   args = ret ind $ "[block.difficulty]"
+cgEthereumPrim ind ret "prim__blocknumber"  args = ret ind $ "[block.number]"
+cgEthereumPrim ind ret "prim__gaslimit"     args = ret ind $ "[block.gaslimit]"
 cgEthereumPrim ind ret "prim__read"            args = ret ind $ "self.storage[" ++ head args ++ "]"
-cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head args ++ "] = " ++ (args !! 1) ++ "\n" ++ indent ind ++ ret ind "0"
+cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head args ++ "] = " ++ (args !! 1) ++ "[0]\n" ++ indent ind ++ ret ind "[0]"
 cgEthereumPrim ind ret "prim__readMap"         args =
-  "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
+  "mk = 'idr_' + " ++ head args ++ "[0] + '_' + " ++ (args !! 1) ++ "[0]\n" ++
   indent ind ++ (ret ind "self.storage[mk]")
 cgEthereumPrim ind ret "prim__writeMap"         args =
-  "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
-   indent ind ++ "self.storage [mk] = " ++ (args !! 2)++"\n" ++ indent ind ++ ret ind "0"
+  "mk = 'idr_' + " ++ head args ++ "[0] + '_' + " ++ (args !! 1) ++ "[0]\n" ++
+   indent ind ++ "self.storage[mk] = " ++ (args !! 2)++"[0]\n" ++ indent ind ++ ret ind "[0]"
 
 cgEthereumPrim ind ret n _ =  "ERROR('Unimplemented cgEthereumPrim\')"
 
