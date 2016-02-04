@@ -86,7 +86,7 @@ cgArgs n = showSep ", " (map loc [1..n])
 
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
-  | shouldSkip n = "#"++ showCG n ++"\n"
+  | shouldSkip n = "" -- "#"++ showCG n ++"\n"
   | otherwise    = "def " ++ sename n ++ "("
                     ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
                     ++ cgBody 2 doRet def ++ "\n\n"
