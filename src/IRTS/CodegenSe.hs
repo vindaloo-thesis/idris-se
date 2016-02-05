@@ -9,6 +9,7 @@ import Data.Maybe
 import Data.Char
 import Data.List
 import Data.Text (unpack)
+import Numeric
 
 codegenSe :: CodeGenerator
 codegenSe ci = do let out = concatMap doCodegen (simpleDecls ci)
@@ -27,8 +28,6 @@ sename n = "idris_" ++ concatMap sechar (showCG n)
 var :: Name -> String
 var n = sename n
 
-loc :: Int -> String
-loc i = "$v" ++ show i
 
 wloc :: Int -> String
 wloc i = "v" ++ show i
@@ -37,6 +36,7 @@ indent :: Int -> String
 indent ind = take (ind*2) $ repeat ' '
 
 doCodegen :: (Name, SDecl) -> String
+--doCodegen (n, SFun _ args i def) = show n ++ ", [" ++ showSep ", " (map show args) ++ "]" ++ show i ++ "\n" -- cgFun n args def
 doCodegen (n, SFun _ args i def) = cgFun n args def
 
 wcgArgs :: Int -> String
@@ -55,12 +55,6 @@ cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ "
   --"  if ret[0] == 0:\n    return 255\n  return ret[1][0]\n\n"
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
-cgExportArg :: FDesc -> String
-cgExportArg (FCon n) = "FCon"
-cgExportArg (FStr n) = n
-cgExportArg (FUnknown) = "FUnknown"
-cgExportArg (FIO n) = "FIO"
-cgExportArg (FApp n args) = "FApp"
 
 
 shouldSkip :: Name -> Bool
@@ -88,14 +82,15 @@ shouldSkip (UN n) = not $ elem (str n) [
   ]
 shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
-cgArgs :: Int -> String
-cgArgs n = showSep ", " (map loc [0..(n-1)])
+-- Simple but effective string hashing...
+-- From src/Idris/Elab/Clause.hs
 
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
   | shouldSkip n = "" -- "#"++ showCG n ++"\n"
   | otherwise    = "macro " ++ sename n ++ "("
                     ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
+                    ++ argVars (length args)
                     ++ cgBody 1 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
         doRet ind "out" = "\n"
@@ -109,59 +104,78 @@ cgFun n args def
 -- We do it this way because we might calculate an expression in a deeply nested
 -- case statement, or inside a let, etc, so the assignment/return of the calculated
 -- expression itself may happen quite deeply.
+        argVars :: Int -> String
+        argVars n = concatMap argAss [0..(n-1)]
 
-cgBody :: Int -> (Int -> String -> String) -> SExp -> String
-cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ sename n ++ "()")
-cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
-cgBody ind ret (SApp _ f args)
--- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessar overhead of the prim__ functions.
-  -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
-  --                                 showSep ", " (map cgVar args) ++ ")")
-  | otherwise        = indent ind ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n"
-                    ++ indent ind ++ ret ind "out"
-cgBody ind ret (SLet (Loc i) v sc)
-   = cgBody ind (\_ x -> loc i ++ " = " ++ x ++ "\n") v ++
-     cgBody ind ret sc
-cgBody ind ret (SUpdate n e)
-   = cgBody ind ret e
-cgBody ind ret (SProj e i)
-   = indent ind ++ (ret ind $ cgVar e ++ "[" ++ show (i + 1) ++ "]")
-cgBody ind ret (SCon _ t n args)
-   = indent ind ++ (ret ind $ "[" ++ showSep ","
-              (show t : (map cgVar args)) ++ "]")
-cgBody ind ret (SCase _ e alts) = cgBody ind ret (SChkCase e alts)
-cgBody ind ret (SChkCase e (a:alts))
-   = let scr = cgVar e
-         scrvar = if any conCase alts || conCase a then scr ++ "[0]" else scr in
-         (cgAlt ind ret scr scrvar "if" a) ++ showSep "\n" (map (cgAlt ind ret scr scrvar "elif") alts) ++ "\n"
-  where conCase (SConCase _ _ _ _ _) = True
-        conCase _ = False
-cgBody ind ret (SConst c) = indent ind ++ (ret ind $ cgConst c)
-cgBody ind ret (SOp (LExternal (NS (UN t) _)) args) = indent ind ++ cgEthereumPrim ind ret (unpack t) (map cgVar args)
-cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
-cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
-cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
-cgBody ind ret (SForeign desc1 desc2 args) = indent ind ++ "ERROR('Unhandled foreign function " ++ show desc1 ++ ", "++ show desc2 ++ ")"
+        argAss :: Int -> String
+        argAss i = indent 1 ++ loc i ++ " = " ++ argVar i ++ "\n"
 
-cgFArgs :: [(FDesc,LVar)] -> String
-cgFArgs []   = ""
-cgFArgs args = "(" ++ intercalate "," (map (cgVar . snd) args) ++ ")"
+        argVar i = "$a" ++ show i
 
-cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
-cgAlt ind ret scr scrvar f (SConstCase t exp)
-   = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n" ++ cgBody (ind+1) ret exp)
-cgAlt ind ret scr scrvar f (SDefaultCase exp)
-   = indent ind ++ (f ++ " True:\n" ++ cgBody (ind+1) ret exp)
-cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
-   = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n"
-             ++ project 1 lv args ++ "\n" ++ cgBody (ind+1) ret exp)
-   where project i v [] = "" -- indent (ind+1) ++ "#empty project"
-         project i v (n : ns) = indent (ind+1) ++ (loc v ++ " = " ++ scr ++ "[" ++ show i ++ "]\n"
-                                  ++ project (i + 1) (v + 1) ns)
 
-cgVar :: LVar -> String
-cgVar (Loc i) = loc i
-cgVar (Glob n) = var n
+        loc :: Int -> String
+        loc i = "v_" ++ qhash i (showCG n)
+
+        qhash :: Int -> String -> String
+        qhash hash [] = showHex (abs hash `mod` 0xffffffff) ""
+        qhash hash (x:xs) = qhash (hash * 33 + fromEnum x) xs
+
+        cgArgs :: Int -> String
+        --cgArgs n = showSep ", " (map loc [0..(n-1)])
+        cgArgs n = showSep ", " (map argVar [0..(n-1)])
+
+        cgBody :: Int -> (Int -> String -> String) -> SExp -> String
+        cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ sename n ++ "()")
+        cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
+        cgBody ind ret (SApp _ f args)
+        -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessar overhead of the prim__ functions.
+          -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
+          --                                 showSep ", " (map cgVar args) ++ ")")
+          | otherwise        = indent ind ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n"
+                            ++ indent ind ++ ret ind "out"
+        cgBody ind ret (SLet (Loc i) v sc)
+           = cgBody ind (\_ x -> loc i ++ " = " ++ x ++ "\n") v ++
+             cgBody ind ret sc
+        cgBody ind ret (SUpdate n e)
+           = cgBody ind ret e
+        cgBody ind ret (SProj e i)
+           = indent ind ++ (ret ind $ cgVar e ++ "[" ++ show (i + 1) ++ "]")
+        cgBody ind ret (SCon _ t n args)
+           = indent ind ++ (ret ind $ "[" ++ showSep ","
+                      (show t : (map cgVar args)) ++ "]")
+        cgBody ind ret (SCase _ e alts) = cgBody ind ret (SChkCase e alts)
+        cgBody ind ret (SChkCase e (a:alts))
+           = let scr = cgVar e
+                 scrvar = if any conCase alts || conCase a then scr ++ "[0]" else scr in
+                 (cgAlt ind ret scr scrvar "if" a) ++ showSep "\n" (map (cgAlt ind ret scr scrvar "elif") alts) ++ "\n"
+          where conCase (SConCase _ _ _ _ _) = True
+                conCase _ = False
+        cgBody ind ret (SConst c) = indent ind ++ (ret ind $ cgConst c)
+        cgBody ind ret (SOp (LExternal (NS (UN t) _)) args) = indent ind ++ cgEthereumPrim ind ret (unpack t) (map cgVar args)
+        cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
+        cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
+        cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
+        cgBody ind ret (SForeign desc1 desc2 args) = indent ind ++ "ERROR('Unhandled foreign function " ++ show desc1 ++ ", "++ show desc2 ++ ")"
+
+        cgFArgs :: [(FDesc,LVar)] -> String
+        cgFArgs []   = ""
+        cgFArgs args = "(" ++ intercalate "," (map (cgVar . snd) args) ++ ")"
+
+        cgAlt :: Int -> (Int -> String -> String) -> String -> String -> String -> SAlt -> String
+        cgAlt ind ret scr scrvar f (SConstCase t exp)
+           = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n" ++ cgBody (ind+1) ret exp)
+        cgAlt ind ret scr scrvar f (SDefaultCase exp)
+           = indent ind ++ (f ++ " True:\n" ++ cgBody (ind+1) ret exp)
+        cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
+           = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n"
+                     ++ project 1 lv args ++ "\n" ++ cgBody (ind+1) ret exp)
+           where project i v [] = "" -- indent (ind+1) ++ "#empty project"
+                 project i v (n : ns) = indent (ind+1) ++ (loc v ++ " = " ++ scr ++ "[" ++ show i ++ "]\n"
+                                          ++ project (i + 1) (v + 1) ns)
+
+        cgVar :: LVar -> String
+        cgVar (Loc i) = loc i
+        cgVar (Glob n) = var n
 
 cgConst :: Const -> String
 cgConst (I i) = show i
