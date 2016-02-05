@@ -28,13 +28,19 @@ var :: Name -> String
 var n = sename n
 
 loc :: Int -> String
-loc i = "v" ++ show i
+loc i = "$v" ++ show i
+
+wloc :: Int -> String
+wloc i = "v" ++ show i
 
 indent :: Int -> String
 indent ind = take (ind*2) $ repeat ' '
 
 doCodegen :: (Name, SDecl) -> String
 doCodegen (n, SFun _ args i def) = cgFun n args def
+
+wcgArgs :: Int -> String
+wcgArgs n = showSep ", " (map wloc [0..(n-1)])
 
 --TODO: Real export interface
 cgExport :: ExportIFace -> [String]
@@ -43,9 +49,10 @@ cgExport (Export _ffiName _fileName es) = ["#exports:\n"] ++ map cgExportDecl es
 cgExportDecl :: Export -> String
 cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show fn ++ "\n"
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
-  "def " ++ en ++ "(" ++ cgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
-  "  ret = self." ++ sename fn ++ "("++ cgArgs (length argTys) ++")\n" ++
-  "  if ret[0] == 0:\n    return 255\n  return ret[1][0]\n\n"
+  "def " ++ en ++ "(" ++ wcgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
+  "  " ++ sename fn ++ "("++ wcgArgs (length argTys) ++")\n" ++
+  "  return out\n"
+  --"  if ret[0] == 0:\n    return 255\n  return ret[1][0]\n\n"
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
 cgExportArg :: FDesc -> String
@@ -87,13 +94,14 @@ cgArgs n = showSep ", " (map loc [0..(n-1)])
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
   | shouldSkip n = "" -- "#"++ showCG n ++"\n"
-  | otherwise    = "def " ++ sename n ++ "("
+  | otherwise    = "macro " ++ sename n ++ "("
                     ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
                     ++ cgBody 1 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
-        doRet ind str
-          | head str == '[' && elem ',' str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
-          | otherwise                     = "return " ++ str ++ "\n"
+        doRet ind "out" = "\n"
+        doRet ind str = "out = " ++ str ++ "\n"
+        --  | head str == '[' && elem ',' str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
+        --  | otherwise                     = "return " ++ str ++ "\n"
 
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
@@ -107,8 +115,10 @@ cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ sename n ++ "()")
 cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
 cgBody ind ret (SApp _ f args)
 -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessar overhead of the prim__ functions.
-  | otherwise        = indent ind ++ ret ind ("self." ++ sename f ++ "(" ++
-                                   showSep ", " (map cgVar args) ++ ")")
+  -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
+  --                                 showSep ", " (map cgVar args) ++ ")")
+  | otherwise        = indent ind ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n"
+                    ++ indent ind ++ ret ind "out"
 cgBody ind ret (SLet (Loc i) v sc)
    = cgBody ind (\_ x -> loc i ++ " = " ++ x ++ "\n") v ++
      cgBody ind ret sc
