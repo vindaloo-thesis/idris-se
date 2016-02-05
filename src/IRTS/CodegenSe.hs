@@ -51,8 +51,7 @@ cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show f
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
   "def " ++ en ++ "(" ++ wcgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
   "  " ++ sename fn ++ "("++ wcgArgs (length argTys) ++")\n" ++
-  "  return out\n"
-  --"  if ret[0] == 0:\n    return 255\n  return ret[1][0]\n\n"
+  "  if out[0] == 0:\n    return 255\n  return out[1]\n\n"
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
 
