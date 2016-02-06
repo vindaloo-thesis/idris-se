@@ -8,7 +8,8 @@ import Idris.Core.TT
 import Data.Maybe
 import Data.Char
 import Data.List
-import Data.Text (unpack)
+import Data.Text (unpack, pack, splitOn)
+import qualified Data.Text as T
 import Numeric
 
 codegenSe :: CodeGenerator
@@ -51,15 +52,21 @@ cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show f
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
   "def " ++ en ++ "(" ++ wcgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
   "  " ++ sename fn ++ "("++ wcgArgs (length argTys) ++")\n" ++
-  "  if out[0] == 0:\n    return 255\n  return out[1]\n\n"
+  "  return out[1]\n\n"
+--  "  if out[0] == 0:\n    return 255\n  return out[1]\n\n"
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
+
+prefix :: String -> String -> Bool
+prefix [] ys = True
+prefix (x:xs) [] = False
+prefix (x:xs) (y:ys) = (x == y) && prefix xs ys
 
 
 shouldSkip :: Name -> Bool
 shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
   -- Skipped namespaces
-  "__prim", "prim"
+  "__prim", "prim", "Effects"
   ]) ns || elem (showCG n) [
   -- Skipped functions
   "Prelude.Bool.&&",
@@ -79,16 +86,21 @@ shouldSkip (UN n) = not $ elem (str n) [
   "io_return",
   "io_bind"
   ]
-shouldSkip n = False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
+shouldSkip n = let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
+
+isNativeEff :: Name -> Bool
+isNativeEff n = prefix "Ethereum.Store" (showCG n)
 
 -- Simple but effective string hashing...
 -- From src/Idris/Elab/Clause.hs
 
+
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n args def
   | shouldSkip n = "" -- "#"++ showCG n ++"\n"
-  | otherwise    = "macro " ++ sename n ++ "("
-                    ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
+  | isNativeEff n = cgSig n args
+                    ++ cgNative
+  | otherwise     = cgSig n args
                     ++ argVars (length args)
                     ++ cgBody 1 doRet def ++ "\n\n"
   where doRet :: Int -> String -> String -- Return the calculated expression
@@ -96,7 +108,18 @@ cgFun n args def
         doRet ind str = "out = " ++ str ++ "\n"
         --  | head str == '[' && elem ',' str = "retVal = " ++ str ++ "\n" ++ indent ind ++ "return retVal\n"
         --  | otherwise                     = "return " ++ str ++ "\n"
-
+        cgSig :: Name -> [Name] -> String
+        cgSig n args = "macro " ++ sename n ++ "("
+                       ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
+        cgNative :: String
+        cgNative = case unpack ( last (splitOn (pack ".") (pack (showCG n)))) of
+                     --TODO: This is NOT nice. should call primitives directly here I guess.
+                     --TODO: Disambiguate read/readMap (arg length can do that)
+                     "write" -> "  idris_Ethereum_46_SIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
+                             ++  "  out = 0\n\n"
+                     "read"  -> "  idris_Ethereum_46_SIO_46_prim_95__95_readMap($a0[0], $a1)\n"
+                             ++  "  rv = out\n\n  out = [0, rv]\n\n"
+                     x       -> x ++ "\n"
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
 --
@@ -130,6 +153,7 @@ cgFun n args def
         -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessar overhead of the prim__ functions.
           -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
           --                                 showSep ", " (map cgVar args) ++ ")")
+          | shouldSkip f     = indent ind ++ ret ind "out" --indent ind ++ "0\n"
           | otherwise        = indent ind ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n"
                             ++ indent ind ++ ret ind "out"
         cgBody ind ret (SLet (Loc i) v sc)
