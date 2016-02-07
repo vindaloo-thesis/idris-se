@@ -21,10 +21,6 @@ data EthTypes : Type -> Type where
   -- Other types
   EthUnit_io  : EthTypes ()
   EthMaybe_io : EthTypes (Maybe a)
-  EthFun_io   : EthTypes a -> EthTypes b -> EthTypes (a -> b)
-
-  -- Arbitrary Idris objects, opaque to Ethrpent
-  EthAny_io   : EthTypes (FFI_C.Raw a)
 
 FFI_Eth : FFI
 FFI_Eth = MkFFI EthTypes String String
