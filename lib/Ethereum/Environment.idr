@@ -5,10 +5,10 @@ import Ethereum.Types
 
 -------------- EFFECT --------------
 data Env : Address -> Address -> Address -> Type where
-  MkEnv : (self: Address)   -> -- Address of this contract
-          (sender: Address) -> -- Sender of transaction (current call)
-          (origin: Address) -> -- Origin of transaction (full call chain)
-        Env self sender origin
+  MkEnv : (self : Address)   -> -- Address of this contract
+          (sender : Address) -> -- Sender of transaction (current call)
+          (origin : Address) -> -- Origin of transaction (full call chain)
+          Env self sender origin
 
 data EnvRules : Effect where
   Self            : sig EnvRules Address (Env c s o)
