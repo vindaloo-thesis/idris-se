@@ -119,9 +119,9 @@ cgFun n@(NS n' ns) args def
         cgNative (UN n) =
                    case map unpack (n:ns) of
                      ("write":"MapField":_) ->
-                       "  idris_Ethereum_46_SIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
+                       "  idris_Ethereum_46_EIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
                        ++ "  out = 0\n\n"
-                     ("read":"MapField":_) -> "  idris_Ethereum_46_SIO_46_prim_95__95_readMap($a0[0], $a1)\n"
+                     ("read":"MapField":_) -> "  idris_Ethereum_46_EIO_46_prim_95__95_readMap($a0[0], $a1)\n"
                              ++  "  rv = out\n  out = [0, rv]\n\n"
                      x       -> "error('unimplemented native', " ++ show x ++ ")\n"
 -- cgBody converts the SExp into a chunk of se which calculates the result
