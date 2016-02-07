@@ -15,11 +15,8 @@ import Numeric
 codegenSe :: CodeGenerator
 codegenSe ci = do let out = concatMap doCodegen (simpleDecls ci)
                       exports = concat (concatMap cgExport (exportDecls ci))
-                  writeFile (outputFile ci) ("\n" ++ helpers ++ "\n" ++
-                                                    out ++ "\n" ++
+                  writeFile (outputFile ci) ("\n" ++out ++ "\n" ++
                                                     exports ++ "\n")
-
-helpers = "def idris_Prelude_46_Nat_46_toIntNat_58_toIntNat_39__58_0(loc0, loc1, loc2): #Prelude.Nat.toIntNat:toIntNat':0\n  return loc1\n"
 
 sename :: Name -> String
 sename n = "idris_" ++ concatMap sechar (showCG n)
@@ -29,7 +26,6 @@ sename n = "idris_" ++ concatMap sechar (showCG n)
 var :: Name -> String
 var n = sename n
 
-
 wloc :: Int -> String
 wloc i = "v" ++ show i
 
@@ -37,13 +33,11 @@ indent :: Int -> String
 indent ind = take (ind*2) $ repeat ' '
 
 doCodegen :: (Name, SDecl) -> String
---doCodegen (n, SFun _ args i def) = show n ++ ", [" ++ showSep ", " (map show args) ++ "]" ++ show i ++ "\n" -- cgFun n args def
 doCodegen (n, SFun _ args i def) = cgFun n args def
 
 wcgArgs :: Int -> String
 wcgArgs n = showSep ", " (map wloc [0..(n-1)])
 
---TODO: Real export interface
 cgExport :: ExportIFace -> [String]
 cgExport (Export _ffiName _fileName es) = ["#exports:\n"] ++ map cgExportDecl es ++ ["#/exports\n"]
 
@@ -92,6 +86,7 @@ shouldSkip n = True --False --let s = showCG n in prefix s "Effects" --False -- 
 isNativeEff :: Name -> Bool -- TODOL Determine what order namespaces come in to make this precise & pretty
 isNativeEff (NS _ ns) = case map unpack (reverse ns) of --TODO: Env, Eth
                           ("Ethereum":"Store":_) -> True
+                          ("Ethereum":"Ether":_) -> True
                           _ -> False --any (\x -> elem (str x) ["Store"]) ns && any (\x -> elem (str x) ["Ethereum"]) ns
 isNativeEff _ = False
 
@@ -99,7 +94,7 @@ isNativeEff _ = False
 
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n@(NS n' ns) args def
-  | shouldSkip n =  "#"++ showCG n ++"\n"
+  | shouldSkip n =  "" -- "#"++ showCG n ++"\n"
   | isNativeEff n = cgSig n args
                     ++ cgNative n'
   | otherwise     = cgSig n args
@@ -115,14 +110,34 @@ cgFun n@(NS n' ns) args def
                        ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
         --TODO: This is not so nice. should call primitives directly here I guess.
         cgNative :: Name -> String
-        cgNative (UN n) =
+        cgNative (UN n) = let cg = cgEthereumPrim 1 doRet in indent 1 ++
+{-
+cgEthereumPrim ind ret "prim__value"        args = ret ind "msg.value"
+cgEthereumPrim ind ret "prim__selfbalance"  args = ret ind $ "self.balance"
+cgEthereumPrim ind ret "prim__balance"      args = ret ind $ head args ++ ".balance"
+cgEthereumPrim ind ret "prim__remainingGas" args = ret ind $ "msg.gas"
+cgEthereumPrim ind ret "prim__timestamp"    args = ret ind $ "block.timestamp"
+cgEthereumPrim ind ret "prim__coinbase"     args = ret ind $ "block.coinbase"
+cgEthereumPrim ind ret "prim__self"         args = ret ind $ "self"
+cgEthereumPrim ind ret "prim__sender"       args = ret ind $ "msg.sender"
+cgEthereumPrim ind ret "prim__origin"       args = ret ind $ "tx.origin"
+cgEthereumPrim ind ret "prim__gasprice"     args = ret ind $ "tx.gasprice"
+cgEthereumPrim ind ret "prim__prevhash"     args = ret ind $ "block.prevhash"
+cgEthereumPrim ind ret "prim__difficulty"   args = ret ind $ "block.difficulty"
+cgEthereumPrim ind ret "prim__blocknumber"  args = ret ind $ "block.number"
+cgEthereumPrim ind ret "prim__gaslimit"     args = ret ind $ "block.gaslimit"
+cgEthereumPrim ind ret "prim__read"            args = ret ind $ "self.storage[" ++ head args ++ "]"
+cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head args ++ "] = " ++ (args !! 1) ++ "\n" ++ indent ind ++ ret ind "0"
+-}
                    case map unpack (n:ns) of
-                     ("write":"MapField":_) ->
-                       "  idris_Ethereum_46_EIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
-                       ++ "  out = 0\n\n"
-                     ("read":"MapField":_) -> "  idris_Ethereum_46_EIO_46_prim_95__95_readMap($a0[0], $a1)\n"
-                             ++  "  rv = out\n  out = [0, rv]\n\n"
+                     ("save":_) -> "out = 0\n"
+                     ("send":_) -> cg "prim__send" ["$a5", "$a4"]
+                     ("write":"MapField":_) -> cg "prim__writeMap" ["$a0[0]", "$a1", "$a2"]
+                       --"  idris_Ethereum_46_EIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
+                       -- ++ "  out = 0\n\n"
+                     ("read":"MapField":_) -> cg "prim__readMap" ["$a0[0]", "$a1"]
                      x       -> "error('unimplemented native', " ++ show x ++ ")\n"
+                    ++ "\n"
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
 --
@@ -159,8 +174,8 @@ cgFun n@(NS n' ns) args def
           -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
           --                                 showSep ", " (map cgVar args) ++ ")")
           | shouldSkip f     = let res = ret ind "out" in
-                                   if dropWhile (flip elem [' ', '\n']) res == ""
-                                      then indent ind ++ "out = [0]\n"
+                                   if ind > 1 && dropWhile (flip elem [' ', '\n']) res == ""
+                                      then indent ind ++ "out = out\n"
                                       else indent ind ++ res -- ++"#'"++res++"'"
           | otherwise        = indent ind ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n"
                             ++ indent ind ++ ret ind "out"
@@ -267,7 +282,7 @@ cgEthereumPrim ind ret "prim__readMap"         args =
   indent ind ++ (ret ind "self.storage[mk]")
 cgEthereumPrim ind ret "prim__writeMap"         args =
   "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
-   indent ind ++ "self.storage [mk] = " ++ (args !! 2)++"\n" ++ indent ind ++ ret ind "0"
+   indent ind ++ "self.storage[mk] = " ++ (args !! 2)++"\n" ++ indent ind ++ ret ind "0"
 
 cgEthereumPrim ind ret n _ =  "ERROR('Unimplemented cgEthereumPrim\')"
 
