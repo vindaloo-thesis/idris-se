@@ -13,12 +13,14 @@ import public Ethereum.Environment
 data SeTypes : Type -> Type where
   -- Primitive types
   SeInt_io    : SeTypes Int
+  SeNat_io    : SeTypes Nat
   SeBool_io   : SeTypes Bool
   SeChar_io   : SeTypes Char
   SeString_io : SeTypes String
 
   -- Other types
   SeUnit_io  : SeTypes ()
+  SeMaybe_io : SeTypes (Maybe a)
   SeFun_io   : SeTypes a -> SeTypes b -> SeTypes (a -> b)
 
   -- Arbitrary Idris objects, opaque to Serpent
