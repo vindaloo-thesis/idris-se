@@ -2,7 +2,7 @@ package serpent
 
 modules = Ethereum
 	, Ethereum.IO
-	, Ethereum.SIO
+	, Ethereum.EIO
 	, Ethereum.Types
 	, Ethereum.Store
 	, Ethereum.Ether

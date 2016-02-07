@@ -1,4 +1,4 @@
-module Ethereum.SIO
+module Ethereum.EIO
 
 import public Effects
 import public Ethereum.Types
@@ -10,27 +10,27 @@ import public Ethereum.Environment
 %access public
 
 -- Supported foreign types
-data SeTypes : Type -> Type where
+data EthTypes : Type -> Type where
   -- Primitive types
-  SeInt_io    : SeTypes Int
-  SeNat_io    : SeTypes Nat
-  SeBool_io   : SeTypes Bool
-  SeChar_io   : SeTypes Char
-  SeString_io : SeTypes String
+  EthInt_io    : EthTypes Int
+  EthNat_io    : EthTypes Nat
+  EthBool_io   : EthTypes Bool
+  EthChar_io   : EthTypes Char
+  EthString_io : EthTypes String
 
   -- Other types
-  SeUnit_io  : SeTypes ()
-  SeMaybe_io : SeTypes (Maybe a)
-  SeFun_io   : SeTypes a -> SeTypes b -> SeTypes (a -> b)
+  EthUnit_io  : EthTypes ()
+  EthMaybe_io : EthTypes (Maybe a)
+  EthFun_io   : EthTypes a -> EthTypes b -> EthTypes (a -> b)
 
-  -- Arbitrary Idris objects, opaque to Serpent
-  SeAny_io   : SeTypes (FFI_C.Raw a)
+  -- Arbitrary Idris objects, opaque to Ethrpent
+  EthAny_io   : EthTypes (FFI_C.Raw a)
 
-FFI_Se : FFI
-FFI_Se = MkFFI SeTypes String String
+FFI_Eth : FFI
+FFI_Eth = MkFFI EthTypes String String
 
-SIO : Type -> Type
-SIO = IO' FFI_Se
+EIO : Type -> Type
+EIO = IO' FFI_Eth
 
 %extern prim__value        : Nat
 %extern prim__selfbalance  : Nat
@@ -44,10 +44,10 @@ SIO = IO' FFI_Se
 %extern prim__timestamp    : Nat
 %extern prim__coinbase     : Address
 
-%extern prim__read : (f : Field) -> (InterpField f)
-%extern prim__write : (f : Field) -> (InterpField f) ->  ()
-%extern prim__readMap : (f : MapField) -> InterpMapKey f -> (InterpMapVal f)
-%extern prim__writeMap : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> ()
+%extern prim__read         : (f : Field) -> InterpField f
+%extern prim__write        : (f : Field) -> InterpField f ->  ()
+%extern prim__readMap      : (f : MapField) -> InterpMapKey f -> InterpMapVal f
+%extern prim__writeMap     : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> ()
 
 
 ---------------------
@@ -58,14 +58,14 @@ Handler EnvRules m where
   handle state@(MkEnv c _ _) Self         k = k c state
   handle state@(MkEnv _ s _) Sender       k = k s state
   handle state@(MkEnv _ _ o) Origin       k = k o state
-  handle state             RemainingGas k = k prim__remainingGas state
-  handle state             TimeStamp    k = k prim__timestamp state
-  handle state             Coinbase     k = k prim__coinbase state
+  handle state               RemainingGas k = k prim__remainingGas state
+  handle state               TimeStamp    k = k prim__timestamp state
+  handle state               Coinbase     k = k prim__coinbase state
 
 Handler EtherRules m where
   handle state@(MkEth v _ _ _) Value           k = k v state
   handle state@(MkEth _ b _ _) ContractBalance k = k b state
-  handle state               (Balance a)     k = k (prim__balance a) state
+  handle state                 (Balance a)     k = k (prim__balance a) state
   handle (MkEth v b t s)       (Save a)        k = k () (MkEth v b t (s+a))
   handle (MkEth v b t s)       (Send a r)      k = k (prim__send r a) (MkEth v b (t+a) s)
 
