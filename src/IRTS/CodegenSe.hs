@@ -83,7 +83,7 @@ shouldSkip (UN n) = not $ elem (str n) [
 shouldSkip (MN _ _) = True -- APPLY, EVAL
 shouldSkip n = True --False --let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
-isNativeEff :: Name -> Bool -- TODOL Determine what order namespaces come in to make this precise & pretty
+isNativeEff :: Name -> Bool -- TODO: Determine what order namespaces come in to make this precise & pretty
 isNativeEff (NS _ ns) = case map unpack (reverse ns) of --TODO: Env, Eth
                           ("Ethereum":"Store":_) -> True
                           ("Ethereum":"Ether":_) -> True
@@ -95,8 +95,7 @@ isNativeEff _ = False
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n@(NS n' ns) args def
   | shouldSkip n =  "" -- "#"++ showCG n ++"\n"
-  | isNativeEff n = cgSig n args
-                    ++ cgNative n'
+  | isNativeEff n = cgNative n'
   | otherwise     = cgSig n args
                     ++ argVars (length args)
                     ++ cgBody 1 doRet def ++ "\n\n"
@@ -110,7 +109,7 @@ cgFun n@(NS n' ns) args def
                        ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
         --TODO: This is not so nice. should call primitives directly here I guess.
         cgNative :: Name -> String
-        cgNative (UN n) = let cg = cgEthereumPrim 1 doRet in indent 1 ++
+        cgNative (UN n'') = cgSig n args ++ indent 1 ++ let cg = cgEthereumPrim 1 doRet in
 {-
 cgEthereumPrim ind ret "prim__value"        args = ret ind "msg.value"
 cgEthereumPrim ind ret "prim__selfbalance"  args = ret ind $ "self.balance"
@@ -129,7 +128,7 @@ cgEthereumPrim ind ret "prim__gaslimit"     args = ret ind $ "block.gaslimit"
 cgEthereumPrim ind ret "prim__read"            args = ret ind $ "self.storage[" ++ head args ++ "]"
 cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head args ++ "] = " ++ (args !! 1) ++ "\n" ++ indent ind ++ ret ind "0"
 -}
-                   case map unpack (n:ns) of
+                   case map unpack (n'':ns) of
                      ("save":_) -> "out = 0\n"
                      ("send":_) -> cg "prim__send" ["$a5", "$a4"]
                      ("write":"MapField":_) -> cg "prim__writeMap" ["$a0[0]", "$a1", "$a2"]
@@ -138,6 +137,7 @@ cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head ar
                      ("read":"MapField":_) -> cg "prim__readMap" ["$a0[0]", "$a1"]
                      x       -> "error('unimplemented native', " ++ show x ++ ")\n"
                     ++ "\n"
+        cgNative n = ""
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
 --

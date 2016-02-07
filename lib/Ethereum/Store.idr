@@ -62,6 +62,7 @@ namespace Field
   write : (f : Field) -> (InterpField f) -> Eff () [STORE]
   write f x = call (Write f x)
 
+  --TODO: This doesn't work when we hack away EVAL/APPLY. But neither does the alternative.
   update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
   update f fun = write f (fun !(read f))
 
@@ -72,6 +73,7 @@ namespace MapField
   write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> Eff () [STORE]
   write f k x = call (WriteMap f k x)
 
+  --TODO: This doesn't work when we hack away EVAL/APPLY. But neither does the alternative.
   update : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f -> InterpMapVal f) -> Eff () [STORE]
   update f k fun = write f k (fun !(read f k))
 
