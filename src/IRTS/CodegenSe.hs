@@ -88,8 +88,10 @@ shouldSkip (UN n) = not $ elem (str n) [
   ]
 shouldSkip n = let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
-isNativeEff :: Name -> Bool
-isNativeEff (NS _ (r:n:ns)) = str r == "Ethereum" && str n == "Store"
+isNativeEff :: Name -> Bool -- TODOL Determine what order namespaces come in to make this precise & pretty
+isNativeEff (NS _ ns) = case map unpack (reverse ns) of --TODO: Env, Eth
+                          ("Ethereum":"Store":_) -> True
+                          _ -> False --any (\x -> elem (str x) ["Store"]) ns && any (\x -> elem (str x) ["Ethereum"]) ns
 isNativeEff _ = False
 
 -- Simple but effective string hashing...
@@ -97,10 +99,10 @@ isNativeEff _ = False
 
 
 cgFun :: Name -> [Name] -> SExp -> String
-cgFun n@(NS _ ns) args def
+cgFun n@(NS n' ns) args def
   | shouldSkip n = "" -- "#"++ showCG n ++"\n"
   | isNativeEff n = cgSig n args
-                    ++ cgNative
+                    ++ cgNative n'
   | otherwise     = cgSig n args
                     ++ argVars (length args)
                     ++ cgBody 1 doRet def ++ "\n\n"
@@ -111,16 +113,17 @@ cgFun n@(NS _ ns) args def
         --  | otherwise                     = "return " ++ str ++ "\n"
         cgSig :: Name -> [Name] -> String
         cgSig n args = "macro " ++ sename n ++ "("
-                       ++ cgArgs (length args) ++ "): #"++ (str . head) ns --showCG n ++"\n"
-        cgNative :: String
-        cgNative = case unpack ( last (splitOn (pack ".") (pack (showCG n)))) of
-                     --TODO: This is NOT nice. should call primitives directly here I guess.
-                     --TODO: Disambiguate read/readMap (arg length can do that)
-                     "write" -> "  idris_Ethereum_46_SIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
-                             ++  "  out = 0\n\n"
-                     "read"  -> "  idris_Ethereum_46_SIO_46_prim_95__95_readMap($a0[0], $a1)\n"
-                             ++  "  rv = out\n\n  out = [0, rv]\n\n"
-                     x       -> x ++ "\n"
+                       ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
+        --TODO: This is not so nice. should call primitives directly here I guess.
+        cgNative :: Name -> String
+        cgNative (UN n) =
+                   case map unpack (n:ns) of
+                     ("write":"MapField":_) ->
+                       "  idris_Ethereum_46_SIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
+                       ++ "  out = 0\n\n"
+                     ("read":"MapField":_) -> "  idris_Ethereum_46_SIO_46_prim_95__95_readMap($a0[0], $a1)\n"
+                             ++  "  rv = out\n  out = [0, rv]\n\n"
+                     x       -> "error('unimplemented native', " ++ show x ++ ")\n"
 -- cgBody converts the SExp into a chunk of se which calculates the result
 -- of an expression, then runs the function on the resulting bit of code.
 --
@@ -151,7 +154,7 @@ cgFun n@(NS _ ns) args def
         cgBody ind ret (SV (Glob n)) = indent ind ++ (ret ind $ sename n ++ "()")
         cgBody ind ret (SV (Loc i)) = indent ind ++ (ret ind $ loc i)
         cgBody ind ret (SApp _ f args)
-        -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessar overhead of the prim__ functions.
+        -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessary overhead of the prim__ functions.
           -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
           --                                 showSep ", " (map cgVar args) ++ ")")
           | shouldSkip f     = indent ind ++ ret ind "out" --indent ind ++ "0\n"
