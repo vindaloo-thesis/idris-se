@@ -5,11 +5,11 @@ import Ethereum.Types
 
 -------------- EFFECT --------------
 data Ether : Nat -> Nat -> Nat -> Nat -> Type where
-  MkS : (value: Nat)   -> -- Incoming ether (call)
-        (balance: Nat) -> -- Ingoing contract balance (call)
-        (trans: Nat)   -> -- Ether sent in outgoing transactions
-        (saved: Nat)   -> -- Part of incoming ether explicitly saved to contract
-        Ether value balance trans saved
+  MkEth : (value: Nat)   -> -- Incoming ether (call)
+          (balance: Nat) -> -- Ingoing contract balance (call)
+          (trans: Nat)   -> -- Ether sent in outgoing transactions
+          (saved: Nat)   -> -- Part of incoming ether explicitly saved to contract
+          Ether value balance trans saved
 
 data EtherRules : Effect where
   -- Incoming ether (call)

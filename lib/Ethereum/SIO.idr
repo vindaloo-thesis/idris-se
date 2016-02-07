@@ -53,19 +53,19 @@ SIO = IO' FFI_Se
 ---------------------
 
 Handler EnvRules m where
-  handle state@(MkE c _ _) Self         k = k c state
-  handle state@(MkE _ s _) Sender       k = k s state
-  handle state@(MkE _ _ o) Origin       k = k o state
+  handle state@(MkEnv c _ _) Self         k = k c state
+  handle state@(MkEnv _ s _) Sender       k = k s state
+  handle state@(MkEnv _ _ o) Origin       k = k o state
   handle state             RemainingGas k = k prim__remainingGas state
   handle state             TimeStamp    k = k prim__timestamp state
   handle state             Coinbase     k = k prim__coinbase state
 
 Handler EtherRules m where
-  handle state@(MkS v _ _ _) Value           k = k v state
-  handle state@(MkS _ b _ _) ContractBalance k = k b state
+  handle state@(MkEth v _ _ _) Value           k = k v state
+  handle state@(MkEth _ b _ _) ContractBalance k = k b state
   handle state               (Balance a)     k = k (prim__balance a) state
-  handle (MkS v b t s)       (Save a)        k = k () (MkS v b t (s+a))
-  handle (MkS v b t s)       (Send a r)      k = k (prim__send r a) (MkS v b (t+a) s)
+  handle (MkEth v b t s)       (Save a)        k = k () (MkEth v b t (s+a))
+  handle (MkEth v b t s)       (Send a r)      k = k (prim__send r a) (MkEth v b (t+a) s)
 
 Handler Store m where
   handle s (Read field)             k = k (prim__read field) s
