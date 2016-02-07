@@ -89,14 +89,15 @@ shouldSkip (UN n) = not $ elem (str n) [
 shouldSkip n = let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
 isNativeEff :: Name -> Bool
-isNativeEff n = prefix "Ethereum.Store" (showCG n)
+isNativeEff (NS _ (r:n:ns)) = str r == "Ethereum" && str n == "Store"
+isNativeEff _ = False
 
 -- Simple but effective string hashing...
 -- From src/Idris/Elab/Clause.hs
 
 
 cgFun :: Name -> [Name] -> SExp -> String
-cgFun n args def
+cgFun n@(NS _ ns) args def
   | shouldSkip n = "" -- "#"++ showCG n ++"\n"
   | isNativeEff n = cgSig n args
                     ++ cgNative
@@ -110,7 +111,7 @@ cgFun n args def
         --  | otherwise                     = "return " ++ str ++ "\n"
         cgSig :: Name -> [Name] -> String
         cgSig n args = "macro " ++ sename n ++ "("
-                       ++ cgArgs (length args) ++ "): #"++ showCG n ++"\n"
+                       ++ cgArgs (length args) ++ "): #"++ (str . head) ns --showCG n ++"\n"
         cgNative :: String
         cgNative = case unpack ( last (splitOn (pack ".") (pack (showCG n)))) of
                      --TODO: This is NOT nice. should call primitives directly here I guess.
@@ -199,7 +200,7 @@ cgFun n args def
         cgVar :: LVar -> String
         cgVar (Loc i) = loc i
         cgVar (Glob n) = var n
-
+cgFun _ _ _ =  ""
 cgConst :: Const -> String
 cgConst (I i) = show i
 cgConst (Ch i) = show (ord i) -- Treat Char as ints, because Se treats them as Strings...
