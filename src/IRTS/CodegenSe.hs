@@ -64,9 +64,9 @@ prefix (x:xs) (y:ys) = (x == y) && prefix xs ys
 
 
 shouldSkip :: Name -> Bool
-shouldSkip n@(NS _ ns) = any (\x -> elem (str x) [
+shouldSkip n@(NS r ns) = any (\x -> elem (str x) [
   -- Skipped namespaces
-  "__prim", "prim", "Effects"
+  "__prim", "prim" , "Effects"
   ]) ns || elem (showCG n) [
   -- Skipped functions
   "Prelude.Bool.&&",
@@ -86,7 +86,8 @@ shouldSkip (UN n) = not $ elem (str n) [
   "io_return",
   "io_bind"
   ]
-shouldSkip n = let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
+shouldSkip (MN _ _) = True -- APPLY, EVAL
+shouldSkip n = True --False --let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
 isNativeEff :: Name -> Bool -- TODOL Determine what order namespaces come in to make this precise & pretty
 isNativeEff (NS _ ns) = case map unpack (reverse ns) of --TODO: Env, Eth
@@ -94,13 +95,11 @@ isNativeEff (NS _ ns) = case map unpack (reverse ns) of --TODO: Env, Eth
                           _ -> False --any (\x -> elem (str x) ["Store"]) ns && any (\x -> elem (str x) ["Ethereum"]) ns
 isNativeEff _ = False
 
--- Simple but effective string hashing...
--- From src/Idris/Elab/Clause.hs
 
 
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n@(NS n' ns) args def
-  | shouldSkip n = "" -- "#"++ showCG n ++"\n"
+  | shouldSkip n =  "#"++ showCG n ++"\n"
   | isNativeEff n = cgSig n args
                     ++ cgNative n'
   | otherwise     = cgSig n args
@@ -142,6 +141,8 @@ cgFun n@(NS n' ns) args def
         loc :: Int -> String
         loc i = "v_" ++ qhash i (showCG n)
 
+        -- Simple but effective string hashing...
+        -- From src/Idris/Elab/Clause.hs
         qhash :: Int -> String -> String
         qhash hash [] = showHex (abs hash `mod` 0xffffffff) ""
         qhash hash (x:xs) = qhash (hash * 33 + fromEnum x) xs
@@ -157,7 +158,10 @@ cgFun n@(NS n' ns) args def
         -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessary overhead of the prim__ functions.
           -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
           --                                 showSep ", " (map cgVar args) ++ ")")
-          | shouldSkip f     = indent ind ++ ret ind "out" --indent ind ++ "0\n"
+          | shouldSkip f     = let res = ret ind "out" in
+                                   if dropWhile (flip elem [' ', '\n']) res == ""
+                                      then indent ind ++ "out = [0]\n"
+                                      else indent ind ++ res -- ++"#'"++res++"'"
           | otherwise        = indent ind ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n"
                             ++ indent ind ++ ret ind "out"
         cgBody ind ret (SLet (Loc i) v sc)
@@ -203,7 +207,14 @@ cgFun n@(NS n' ns) args def
         cgVar :: LVar -> String
         cgVar (Loc i) = loc i
         cgVar (Glob n) = var n
-cgFun _ _ _ =  ""
+        {-
+cgFun n@(NS _ _) _ _ =  "#NS " ++ show n++ "\n"
+cgFun n@(SN _) _ _ =  "#SN " ++ show n++ "\n"
+cgFun n@(UN _) _ _ =  "#UN " ++ show n++ "\n"
+cgFun n@(MN _ _) _ _ =  "#MN " ++ show n++ "\n"
+cgFun n@(SymRef _) _ _ =  "#SymRef " ++ show n++ "\n"
+-}
+cgFun n _ _= ""
 cgConst :: Const -> String
 cgConst (I i) = show i
 cgConst (Ch i) = show (ord i) -- Treat Char as ints, because Se treats them as Strings...
