@@ -8,7 +8,7 @@ import Effect.Default
 %access public
 
 Address : Type
-Address = Int
+Address = Integer
 
 implicit natInt : Nat -> Int
 natInt = toIntNat

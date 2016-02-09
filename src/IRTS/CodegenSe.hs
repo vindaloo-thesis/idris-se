@@ -197,7 +197,9 @@ cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head ar
           where conCase (SConCase _ _ _ _ _) = True
                 conCase _ = False
         cgBody ind ret (SConst c) = indent ind ++ (ret ind $ cgConst c)
-        cgBody ind ret (SOp (LExternal (NS (UN t) _)) args) = indent ind ++ cgEthereumPrim ind ret (unpack t) (map cgVar args)
+        cgBody ind ret (SOp (LExternal (NS (UN t) ns)) args)
+          -- | str (head ns) ==  "store" = indent ind ++ cgEthereumStorage ind ret (unpack t) (map cgVar args)
+          | otherwise               = indent ind ++ cgEthereumPrim ind ret (unpack t) (map cgVar args)
         cgBody ind ret (SOp op args) = indent ind ++ (ret ind $ cgOp op (map cgVar args))
         cgBody ind ret SNothing = indent ind ++ (ret ind "0 #Nothing")
         cgBody ind ret (SError x) = indent ind ++ (ret ind $ "error( " ++ show x ++ ")")
@@ -236,7 +238,7 @@ cgConst (Ch i) = show (ord i) -- Treat Char as ints, because Se treats them as S
 cgConst (BI i) = show i
 cgConst (Str s) = show s
 cgConst TheWorld = "0 #TheWorld"
-cgConst x | isTypeConst x = "0 #TypeConst"
+cgConst x | isTypeConst x = "0 #TypeConst " ++ show x
 cgConst x = error $ "Constant " ++ show x ++ " not compilable yet"
 
 cgOp :: PrimFn -> [String] -> String
@@ -260,6 +262,7 @@ cgOp (LSExt _ _) [x] = x
 cgOp op exps = "0 #error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
 
 cgEthereumPrim :: Int -> (Int -> String -> String) -> String -> [String] -> String
+cgEthereumPrim ind ret "mkfield"        args = ret ind "self.storage(" ++ intercalate "," args ++ ")"
 cgEthereumPrim ind ret "prim__value"        args = ret ind "msg.value"
 cgEthereumPrim ind ret "prim__selfbalance"  args = ret ind $ "self.balance"
 cgEthereumPrim ind ret "prim__balance"      args = ret ind $ head args ++ ".balance"
@@ -284,5 +287,7 @@ cgEthereumPrim ind ret "prim__writeMap"         args =
   "mk = 'idr_' + " ++ head args ++ " + '_' + " ++ (args !! 1) ++ "\n" ++
    indent ind ++ "self.storage[mk] = " ++ (args !! 2)++"\n" ++ indent ind ++ ret ind "0"
 
-cgEthereumPrim ind ret n _ =  "ERROR('Unimplemented cgEthereumPrim\')"
+cgEthereumPrim ind ret n args =  "ERROR('Unimplemented cgEthereumPrim ("++n++"("++intercalate "," args ++")\')"
 
+cgEthereumStorage :: Int -> (Int -> String -> String) -> String -> [String] -> String
+cgEthereumStorage ind ret s        args = indent ind ++ ret ind (s ++ "_" ++ intercalate "," args) ++ "\n"

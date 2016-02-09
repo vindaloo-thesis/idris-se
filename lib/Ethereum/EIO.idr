@@ -40,10 +40,10 @@ EIO = IO' FFI_Eth
 %extern prim__timestamp    : Nat
 %extern prim__coinbase     : Address
 
-%extern prim__read         : (f : Field) -> InterpField f
-%extern prim__write        : (f : Field) -> InterpField f ->  ()
-%extern prim__readMap      : (f : MapField) -> InterpMapKey f -> InterpMapVal f
-%extern prim__writeMap     : (f : MapField) -> InterpMapKey f -> InterpMapVal f -> ()
+%extern prim__read         : Field a -> a
+%extern prim__write        : Field a -> a ->  ()
+%extern prim__readMap      : MapField a b -> a -> b
+%extern prim__writeMap     : MapField a b -> a -> b -> ()
 
 
 ---------------------

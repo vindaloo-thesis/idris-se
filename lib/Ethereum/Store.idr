@@ -5,75 +5,75 @@ import Data.HVect
 import Effects
 import Ethereum.Types
 
--- %default total
+%default total
 
 ---- TYPES ----
 VarName : Type
-VarName = String
+VarName = Nat
 
-data Field    = EInt VarName 
-data MapField = EMIntInt VarName | EMAddressInt VarName | EMIntAddress VarName
+interface Serialize (a : Type) where
+  serialize   : a -> String
+  deserialize : String -> a
+  defVal : a
 
-Show Field where
-  show (EInt n)     = "EINT_" ++ n
+record Field a where
+  constructor MkField
+  name : VarName
 
-Show MapField where
-  show (EMIntInt n) = "EMII_" ++ n
-  show (EMAddressInt n) = "EMAI_" ++ n
-  show (EMIntAddress n) = "EMIA_" ++ n
+record MapField a b where
+  constructor MkMapField
+  name : VarName
 
-namespace Field
-  name : Field -> VarName
-  name (EInt n) = n
+Serialize Int where
+  serialize = show
+  deserialize = prim__fromStrInt 
+  defVal = 0
 
-namespace MapField
-  name : MapField -> VarName
-  name (EMIntInt n) = n
-  name (EMAddressInt n) = n
-  name (EMIntAddress n) = n
+Serialize Address where
+  serialize = show
+  deserialize = prim__fromStrBigInt 
+  defVal = 0
 
-InterpField : Field -> Type
-InterpField (EInt _) = Int
+Serialize String where
+  serialize = id
+  deserialize = id
+  defVal = ""
 
-InterpMapKey : MapField -> Type
-InterpMapKey (EMIntInt _)     = Int
-InterpMapKey (EMAddressInt _) = Address
-InterpMapKey (EMIntAddress _) = Int
+Show (Field a) where
+  show f = "EF_" ++ show (name f)
 
-InterpMapVal : MapField -> Type
-InterpMapVal (EMIntInt _)    = Int
-InterpMapVal (EMAddressInt _) = Int
-InterpMapVal (EMIntAddress _) = Address
+Show (MapField a b) where
+  show f = "EMF_" ++ show (name f)
 
 ---- EFFECT ----
 data Store : Effect where
-  Read     : (f : Field) -> sig Store (InterpField f) ()
-  ReadMap  : (f : MapField) -> (InterpMapKey f) -> sig Store (InterpMapVal f) ()
-  Write    : (f : Field) -> (InterpField f) -> sig Store () ()
-  WriteMap : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> sig Store () ()
+  Read     : Field a -> sig Store a ()
+  ReadMap  : MapField a b -> a -> sig Store b ()
+  Write    : Field a -> a -> sig Store () ()
+  WriteMap : MapField a b -> a -> b -> sig Store () ()
 
 STORE : EFFECT
 STORE = MkEff () Store
 
 namespace Field
-  read : (f : Field) -> Eff (InterpField f) [STORE]
+  read : Field a -> Eff a [STORE]
   read f = call $ Read f
 
-  write : (f : Field) -> (InterpField f) -> Eff () [STORE]
+  write : Field a -> a -> Eff () [STORE]
   write f x = call (Write f x)
 
   --TODO: This doesn't work when we hack away EVAL/APPLY. But neither does the alternative.
-  update : (f : Field) -> (InterpField f -> InterpField f) -> Eff () [STORE]
+  update : Field a -> (a -> a) -> Eff () [STORE]
   update f fun = write f (fun !(read f))
 
 namespace MapField
-  read : (f : MapField) -> (InterpMapKey f) -> Eff (InterpMapVal f) [STORE]
+  read : MapField a b -> a -> Eff b [STORE]
   read f k = call $ ReadMap f k
 
-  write : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f) -> Eff () [STORE]
+  write : MapField a b -> a -> b -> Eff () [STORE]
   write f k x = call (WriteMap f k x)
 
   --TODO: This doesn't work when we hack away EVAL/APPLY. But neither does the alternative.
-  update : (f : MapField) -> (InterpMapKey f) -> (InterpMapVal f -> InterpMapVal f) -> Eff () [STORE]
+  update : MapField a b -> a -> (b -> b) -> Eff () [STORE]
   update f k fun = write f k (fun !(read f k))
 
