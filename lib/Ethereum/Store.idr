@@ -11,10 +11,6 @@ import Ethereum.Types
 VarName : Type
 VarName = Nat
 
-interface Serialize (a : Type) where
-  serialize   : a -> String
-  deserialize : String -> a
-  defVal : a
 
 record Field a where
   constructor MkField
@@ -23,27 +19,6 @@ record Field a where
 record MapField a b where
   constructor MkMapField
   name : VarName
-
-Serialize Int where
-  serialize = show
-  deserialize = prim__fromStrInt 
-  defVal = 0
-
-Serialize Address where
-  serialize = show
-  deserialize = prim__fromStrBigInt 
-  defVal = 0
-
-Serialize String where
-  serialize = id
-  deserialize = id
-  defVal = ""
-
-Show (Field a) where
-  show f = "EF_" ++ show (name f)
-
-Show (MapField a b) where
-  show f = "EMF_" ++ show (name f)
 
 ---- EFFECT ----
 data Store : Effect where

@@ -24,6 +24,31 @@ Handler EtherRules IO where
                                                       k () (MkEth v b t (s+a))
   handle (MkEth v b t s)       (Send a r) k = do putStrLn $ "- " ++ show a ++ " wei => " ++ show r
                                                  k () (MkEth v b (t+a) s)
+interface Serialize (a : Type) where
+  serialize   : a -> String
+  deserialize : String -> a
+  defVal : a
+
+Serialize Int where
+  serialize = show
+  deserialize = prim__fromStrInt 
+  defVal = 0
+
+Serialize Address where
+  serialize = show
+  deserialize = prim__fromStrBigInt 
+  defVal = 0
+
+Serialize String where
+  serialize = id
+  deserialize = id
+  defVal = ""
+
+Show (Field a) where
+  show f = "EF_" ++ show (name f)
+
+Show (MapField a b) where
+  show f = "EMF_" ++ show (name f)
 
 {-
 Handler Store IO where
