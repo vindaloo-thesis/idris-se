@@ -42,8 +42,8 @@ EIO = IO' FFI_Eth
 
 %extern prim__read         : Field a -> a
 %extern prim__write        : Field a -> a ->  ()
-%extern prim__readMap      : MapField a b -> a -> b
-%extern prim__writeMap     : MapField a b -> a -> b -> ()
+%extern prim__readMap      : Field a b -> a -> b
+%extern prim__writeMap     : Field a b -> a -> b -> ()
 
 
 ---------------------
@@ -62,8 +62,8 @@ Handler EtherRules m where
   handle state@(MkEth v _ _ _) Value           k = k v state
   handle state@(MkEth _ b _ _) ContractBalance k = k b state
   handle state                 (Balance a)     k = k (prim__balance a) state
-  handle (MkEth v b t s)       (Save a)        k = k () (MkEth v b t (s+a))
-  handle (MkEth v b t s)       (Send a r)      k = k (prim__send r a) (MkEth v b (t+a) s)
+  handle (MkEth v b t kept)       (Keep a)     k = k () (MkEth v b t (kept+a))
+  handle (MkEth v b t kept)       (Send a r)   k = k (prim__send r a) (MkEth v b (t+a) kept)
 
 Handler Store m where
   handle s (Read field)             k = k (prim__read field) s

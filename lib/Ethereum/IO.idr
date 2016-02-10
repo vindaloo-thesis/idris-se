@@ -20,10 +20,10 @@ Handler EtherRules IO where
   handle state@(MkEth v _ _ _) Value           k = k v   state
   handle state@(MkEth _ b _ _) ContractBalance k = k b   state
   handle state                 (Balance a)     k = k 100 state --Dummy value
-  handle (MkEth v b t s)       (Save a)        k = do putStrLn $ "- Save " ++ show a ++ " wei"
-                                                      k () (MkEth v b t (s+a))
-  handle (MkEth v b t s)       (Send a r) k = do putStrLn $ "- " ++ show a ++ " wei => " ++ show r
-                                                 k () (MkEth v b (t+a) s)
+  handle (MkEth v b t kept)    (Keep a)        k = do putStrLn $ "- Keep " ++ show a ++ " wei"
+                                                      k () (MkEth v b t (kept+a))
+  handle (MkEth v b t kept)    (Send a r)      k = do putStrLn $ "- " ++ show a ++ " wei => " ++ show r
+                                                      k () (MkEth v b (t+a) kept)
 interface Serialize (a : Type) where
   serialize   : a -> String
   deserialize : String -> a
@@ -47,7 +47,7 @@ Serialize String where
 Show (Field a) where
   show f = "EF_" ++ show (name f)
 
-Show (MapField a b) where
+Show (Field a b) where
   show f = "EMF_" ++ show (name f)
 
 {-

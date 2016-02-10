@@ -12,20 +12,26 @@ VarName : Type
 VarName = Nat
 
 
-record Field a where
-  constructor MkField
-  name : VarName
+namespace Field
+  data Field : Type -> Type where
+    MkField  : VarName -> Field a
 
-record MapField a b where
-  constructor MkMapField
-  name : VarName
+  name : Field a -> VarName
+  name  (MkField n) = n
+
+namespace MapField
+  data Field : Type -> Type -> Type where
+    MkField : VarName -> Field a b
+
+  name : Field a b -> VarName
+  name (MkField n) = n
 
 ---- EFFECT ----
 data Store : Effect where
   Read     : Field a -> sig Store a ()
-  ReadMap  : MapField a b -> a -> sig Store b ()
+  ReadMap  : Field a b -> a -> sig Store b ()
   Write    : Field a -> a -> sig Store () ()
-  WriteMap : MapField a b -> a -> b -> sig Store () ()
+  WriteMap : Field a b -> a -> b -> sig Store () ()
 
 STORE : EFFECT
 STORE = MkEff () Store
@@ -42,13 +48,13 @@ namespace Field
   update f fun = write f (fun !(read f))
 
 namespace MapField
-  read : MapField a b -> a -> Eff b [STORE]
+  read : Field a b -> a -> Eff b [STORE]
   read f k = call $ ReadMap f k
 
-  write : MapField a b -> a -> b -> Eff () [STORE]
+  write : Field a b -> a -> b -> Eff () [STORE]
   write f k x = call (WriteMap f k x)
 
   --TODO: This doesn't work when we hack away EVAL/APPLY. But neither does the alternative.
-  update : MapField a b -> a -> (b -> b) -> Eff () [STORE]
+  update : Field a b -> a -> (b -> b) -> Eff () [STORE]
   update f k fun = write f k (fun !(read f k))
 
