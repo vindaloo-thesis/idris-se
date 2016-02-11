@@ -81,7 +81,7 @@ shouldSkip (UN n) = not $ elem (str n) [
   "io_bind"
   ]
 shouldSkip (MN _ _) = True -- APPLY, EVAL
-shouldSkip n = True --False --let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
+shouldSkip n        = True --False --let s = showCG n in prefix s "Effects" --False -- Hitt på nåt. let s = showCG n in isInfixOf "Ethereum" s || isInfixOf "Prelude" s
 
 isNativeEff :: Name -> Bool -- TODO: Determine what order namespaces come in to make this precise & pretty
 isNativeEff (NS _ ns) = case map unpack (reverse ns) of --TODO: Env, Eth
@@ -90,11 +90,9 @@ isNativeEff (NS _ ns) = case map unpack (reverse ns) of --TODO: Env, Eth
                           _ -> False --any (\x -> elem (str x) ["Store"]) ns && any (\x -> elem (str x) ["Ethereum"]) ns
 isNativeEff _ = False
 
-
-
 cgFun :: Name -> [Name] -> SExp -> String
 cgFun n@(NS n' ns) args def
-  | shouldSkip n =  "" -- "#"++ showCG n ++"\n"
+  | shouldSkip n =  "#"++ showCG n ++" not generated\n\n"
   | isNativeEff n = cgNative n'
   | otherwise     = cgSig n args
                     ++ argVars (length args)
@@ -173,10 +171,11 @@ cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head ar
         -- TODO: Case ethereumprim and generate proper serpent calls immediatly, don't generate our own prim__functions. This avoids unnecessary overhead of the prim__ functions.
           -- | otherwise        = indent ind ++ ret ind (sename f ++ "(" ++
           --                                 showSep ", " (map cgVar args) ++ ")")
-          | shouldSkip f     = let res = ret ind "out" in
-                                   if ind > 1 && dropWhile (flip elem [' ', '\n']) res == ""
-                                      then indent ind ++ "out = out\n"
-                                      else indent ind ++ res -- ++"#'"++res++"'"
+          | shouldSkip f        = let res = ret ind "out" in
+                                      indent ind ++ "#" ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n" ++
+                                      if ind > 1 && dropWhile (flip elem [' ', '\n']) res == ""
+                                         then indent ind ++ "out = out\n"
+                                         else indent ind ++ res -- ++"#'"++res++"'"
           | otherwise        = indent ind ++ (sename f ++ "(" ++ showSep ", " (map cgVar args) ++ ")") ++ "\n"
                             ++ indent ind ++ ret ind "out"
         cgBody ind ret (SLet (Loc i) v sc)
