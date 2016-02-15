@@ -129,10 +129,10 @@ cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head ar
                    case map unpack (n'':ns) of
                      ("save":_) -> "out = 0\n"
                      ("send":_) -> cg "prim__send" ["$a5", "$a4"]
-                     ("write":"MapField":_) -> cg "prim__writeMap" ["$a0[0]", "$a1", "$a2"]
+                     ("write":"MapField":_) -> cg "prim__writeMap" ["$a2[0]", "$a3", "$a4"]
                        --"  idris_Ethereum_46_EIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
                        -- ++ "  out = 0\n\n"
-                     ("read":"MapField":_) -> cg "prim__readMap" ["$a0[0]", "$a1"]
+                     ("read":"MapField":_) -> cg "prim__readMap" ["$a2[0]", "$a3"]
                      x       -> "error('unimplemented native', " ++ show x ++ ")\n"
                     ++ "\n"
         cgNative n = ""
