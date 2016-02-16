@@ -46,7 +46,7 @@ cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show f
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
   "def " ++ en ++ "(" ++ wcgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
   "  " ++ sename fn ++ "("++ wcgArgs (length argTys) ++")\n" ++
-  "  return out[1]\n\n"
+  "  return out\n\n"
 --  "  if out[0] == 0:\n    return 255\n  return out[1]\n\n"
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
@@ -212,7 +212,7 @@ cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head ar
         cgAlt ind ret scr scrvar f (SConstCase t exp)
            = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n" ++ cgBody (ind+1) ret exp)
         cgAlt ind ret scr scrvar f (SDefaultCase exp)
-           = indent ind ++ (f ++ " True:\n" ++ cgBody (ind+1) ret exp)
+           = indent ind ++ (f ++ " 1:\n" ++ cgBody (ind+1) ret exp)
         cgAlt ind ret scr scrvar f (SConCase lv t n args exp)
            = indent ind ++ (f ++ " " ++ scrvar ++ " == " ++ show t ++ ":\n"
                      ++ project 1 lv args ++ "\n" ++ cgBody (ind+1) ret exp)
