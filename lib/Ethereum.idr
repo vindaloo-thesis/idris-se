@@ -11,9 +11,9 @@ import public Ethereum.Environment
 %access public
 
 -- Syntax extensions for ETH
-term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] "}" = DepEff.Eff restype [ETH v b prev_t prev_s,STORE] (\res => [ETH v b (prev_t+t) (prev_s+s), STORE, ENV contract sender origin])
-term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [effs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: effs) (\res => ETH v b (prev_t+t) (prev_s+s) :: STORE :: ENV contract sender origin :: effs)
-term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [ieffs] "=>" [oeffs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: ieffs) (\res => ETH v b (prev_t+t) (prev_s+s) :: STORE :: ENV contract sender origin :: oeffs)
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] "}" = DepEff.Eff restype [ETH v b prev_t prev_s,STORE,ENV contract sender origin] (\res => [ETH v b (prev_t+t) (prev_s+s), STORE, ENV contract sender origin])
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [effs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: ENV contract sender origin :: effs) (\res => ETH v b (prev_t+t) (prev_s+s) :: STORE :: ENV contract sender origin :: effs)
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [ieffs] "=>" [oeffs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: ENV contract sender origin :: ieffs) (\res => ETH v b (prev_t+t) (prev_s+s) :: STORE :: ENV contract sender origin :: oeffs)
 
 
 -- Syntax extensions for ENV
