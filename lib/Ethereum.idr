@@ -16,6 +16,12 @@ term syntax EthereumEff "(" {res} ":" [restype] ")" "{" "}" = SimpleEff.Eff rest
 term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] "}" = DepEff.Eff restype [ETH v b prev_t prev_s,STORE,ENV contract sender origin] (\res => [ETH v b (t+prev_t) (s+prev_s), STORE, ENV contract sender origin])
 term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [effs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: ENV contract sender origin :: effs) (\res => ETH v b (t+prev_t) (s+prev_s) :: STORE :: ENV contract sender origin :: effs)
 term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [ieffs] "=>" [oeffs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: ENV contract sender origin :: ieffs) (\res => ETH v b (t+prev_t) (s+prev_s) :: STORE :: ENV contract sender origin :: oeffs)
+{-
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] "}" = DepEff.Eff restype [ETH v b 0 0,STORE,ENV contract sender origin] (\res => [ETH v b (t) (s), STORE, ENV contract sender origin])
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [effs] "}" = DepEff.Eff restype (ETH v b 0 0 :: STORE :: ENV contract sender origin :: effs) (\res => ETH v b (t) (s) :: STORE :: ENV contract sender origin :: effs)
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [ieffs] "=>" [oeffs] "}" = DepEff.Eff restype (ETH v b 0 0 :: STORE :: ENV contract sender origin :: ieffs) (\res => ETH v b (t) (s) :: STORE :: ENV contract sender origin :: oeffs)
+-}
+
 
 
 -- Syntax extensions for ENV
@@ -28,3 +34,9 @@ term syntax EthereumEff "(" {res} ":" [restype] ")" "{" SENDER "=" [s'] ";" ORIG
 term syntax EthereumEff "(" {res} ":" [restype] ")" "{" SENDER "=" [s'] ";" ORIGIN "=" [o] ";" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] "}" = DepEff.Eff restype [ETH v b prev_t prev_s, STORE, ENV c s' o] (\res => [ETH v b (t+prev_t) (s+prev_s), STORE, ENV c s' o])
 term syntax EthereumEff "(" {res} ":" [restype] ")" "{" SENDER "=" [s'] ";" ORIGIN "=" [o] ";" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [effs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: ENV c s' o :: effs) (\res => ETH v b (t+prev_t) (s+prev_s) :: STORE :: ENV c s' o :: effs)
 term syntax EthereumEff "(" {res} ":" [restype] ")" "{" SENDER "=" [s'] ";" ORIGIN "=" [o] ";" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [ieffs] "=>" [oeffs] "}" = DepEff.Eff restype (ETH v b prev_t prev_s :: STORE :: ENV c s' o :: ieffs) (\res => ETH v b (t+prev_t) (s+prev_s) :: STORE :: ENV c s' o :: oeffs)
+
+{-
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" SENDER "=" [s'] ";" ORIGIN "=" [o] ";" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] "}" = DepEff.Eff restype [ETH v b 0 0, STORE, ENV c s' o] (\res => [ETH v b (t) (s), STORE, ENV c s' o])
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" SENDER "=" [s'] ";" ORIGIN "=" [o] ";" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [effs] "}" = DepEff.Eff restype (ETH v b 0 0 :: STORE :: ENV c s' o :: effs) (\res => ETH v b (t) (s) :: STORE :: ENV c s' o :: effs)
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" SENDER "=" [s'] ";" ORIGIN "=" [o] ";" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] ";" [ieffs] "=>" [oeffs] "}" = DepEff.Eff restype (ETH v b 0 0  :: STORE :: ENV c s' o :: ieffs) (\res => ETH v b (t) (s) :: STORE :: ENV c s' o :: oeffs)
+-}

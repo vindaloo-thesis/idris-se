@@ -46,7 +46,7 @@ cgExportDecl (ExportFun fn (FStr en) (FIO ret) argTys) = "#exported: " ++ show f
 cgExportDecl (ExportFun fn (FStr en) ret argTys) = "#exported: " ++ show fn ++ " " ++ en ++ "\n" ++
   "def " ++ en ++ "(" ++ wcgArgs (length argTys) ++"): #" ++ show (length argTys) ++ "\n" ++
   "  " ++ sename fn ++ "("++ wcgArgs (length argTys) ++")\n" ++
-  "  return out\n\n"
+  "  return out[2]\n\n"
 --  "  if out[0] == 0:\n    return 255\n  return out[1]\n\n"
 cgExportDecl _ = ""  -- ignore everything else. Like Data.
 
@@ -127,7 +127,7 @@ cgEthereumPrim ind ret "prim__read"            args = ret ind $ "self.storage[" 
 cgEthereumPrim ind ret "prim__write"           args = "self.storage[" ++ head args ++ "] = " ++ (args !! 1) ++ "\n" ++ indent ind ++ ret ind "0"
 -}
                    case map unpack (n'':ns) of
-                     ("save":_) -> "out = 0\n"
+                     ("keep":_) -> "out = 0\n"
                      ("send":_) -> cg "prim__send" ["$a5", "$a4"]
                      ("write":"MapField":_) -> cg "prim__writeMap" ["$a2[0]", "$a3", "$a4"]
                        --"  idris_Ethereum_46_EIO_46_prim_95__95_writeMap($a0[0], $a1, $a2)\n"
