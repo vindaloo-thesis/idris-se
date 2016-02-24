@@ -38,15 +38,15 @@ ETH v b t k = MkEff (Ether v b t k) EtherRules
 
 value : Eff Nat
        [ETH v b t k]
-value = call $ Value
+value = call Value
 
 balance : Address -> Eff Nat
        [ETH v b t k]
-balance a = call $ (Balance a)
+balance a = call $ Balance a
 
 contractBalance : Eff Nat
        [ETH v b t k]
-contractBalance = call $ ContractBalance
+contractBalance = call ContractBalance
 
 keep : (a : Nat) -> Eff ()
        [ETH v b t k]
