@@ -10,12 +10,12 @@ data Env : Address -> Address -> Type where
           Env sender origin
 
 data EnvRules : Effect where
-  Self            : sig EnvRules Address (Ethereum.Environment.Env s o)
-  Sender          : sig EnvRules Address (Ethereum.Environment.Env s o)
-  Origin          : sig EnvRules Address (Ethereum.Environment.Env s o)
-  RemainingGas    : sig EnvRules Nat (Ethereum.Environment.Env s o)
-  TimeStamp       : sig EnvRules Nat (Ethereum.Environment.Env s o)
-  Coinbase        : sig EnvRules Address (Ethereum.Environment.Env s o)
+  Self            : sig EnvRules Address (Environment.Env s o)
+  Sender          : sig EnvRules Address (Environment.Env s o)
+  Origin          : sig EnvRules Address (Environment.Env s o)
+  RemainingGas    : sig EnvRules Nat (Environment.Env s o)
+  TimeStamp       : sig EnvRules Nat (Environment.Env s o)
+  Coinbase        : sig EnvRules Address (Environment.Env s o)
 
 ENV : Address -> Address -> EFFECT
 ENV s o = MkEff (Env s o) EnvRules
@@ -37,3 +37,4 @@ timeStamp = call $ TimeStamp
 
 coinbase : Eff Address [ENV s o]
 coinbase = call $ Coinbase
+
