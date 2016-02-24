@@ -6,11 +6,12 @@ import public Ethereum.Types
 import public Ethereum.Store
 import public Ethereum.Ether
 import public Ethereum.Environment
+import public Ethereum.Commitments
 
 -- %default total
 %access public
 
-term syntax EthereumEff "(" {res} ":" [restype] ")" "{" "}" = SimpleEff.Eff restype [ETH v b t s,STORE,ENV contract sender origin]
+term syntax EthereumEff "(" {res} ":" [restype] ")" "{" "}" = SimpleEff.Eff restype [ETH v b t s,STORE,ENV sender origin]
 
 -- Syntax extensions for ETH
 term syntax EthereumEff "(" {res} ":" [restype] ")" "{" VALUE "=" [v] ";" BALANCE "=" [b] ";" TRANS "=" [t] ";" KEEP "=" [s] "}" = DepEff.Eff restype [ETH v b prev_t prev_s,STORE,ENV contract sender origin] (\res => [ETH v b (t+prev_t) (s+prev_s), STORE, ENV sender origin])

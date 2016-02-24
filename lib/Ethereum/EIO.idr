@@ -5,6 +5,7 @@ import public Ethereum.Types
 import public Ethereum.Store
 import public Ethereum.Ether
 import public Ethereum.Environment
+import public Ethereum.Commitments
 
 %default total
 %access public

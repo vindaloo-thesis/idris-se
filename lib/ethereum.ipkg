@@ -7,5 +7,6 @@ modules = Ethereum
 	, Ethereum.Store
 	, Ethereum.Ether
 	, Ethereum.Environment
+	, Ethereum.Commitments
 
 opts = "-p effects --total"
