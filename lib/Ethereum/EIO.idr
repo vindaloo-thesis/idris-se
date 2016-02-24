@@ -51,9 +51,9 @@ EIO = IO' FFI_Eth
 ---------------------
 
 Handler EnvRules m where
-  handle state@(MkEnv c _ _) Self         k = k c state
-  handle state@(MkEnv _ s _) Sender       k = k s state
-  handle state@(MkEnv _ _ o) Origin       k = k o state
+  handle state@(MkEnv _ _) Self         k = k prim__self state
+  handle state@(MkEnv s _) Sender       k = k s state
+  handle state@(MkEnv _ o) Origin       k = k o state
   handle state               RemainingGas k = k prim__remainingGas state
   handle state               TimeStamp    k = k prim__timestamp state
   handle state               Coinbase     k = k prim__coinbase state
