@@ -52,7 +52,7 @@ EIO = IO' FFI_Eth
 ---------------------
 
 Handler EnvRules m where
-  handle state@(MkEnv _ _) Self           k = k prim__self state
+  handle state             Self           k = k prim__self state
   handle state@(MkEnv s _) Sender         k = k s state
   handle state@(MkEnv _ o) Origin         k = k o state
   handle state               RemainingGas k = k prim__remainingGas state
