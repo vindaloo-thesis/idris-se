@@ -9,12 +9,12 @@ import public Ethereum.Environment
 %default total
 
 Handler EnvRules IO where
-  handle state@(MkEnv c _ _) Self     k = k c state
-  handle state@(MkEnv _ s _) Sender   k = k s state
-  handle state@(MkEnv _ _ o) Origin   k = k o state
+  handle state@(MkEnv _ _) Self       k = k 1338 state
+  handle state@(MkEnv s _) Sender     k = k s state
+  handle state@(MkEnv _ o) Origin     k = k o state
   handle state RemainingGas           k = k 100 state
   handle state TimeStamp              k = k 1453299096 state
-  handle state@(MkEnv _ _ o) Coinbase k = k o state
+  handle state@(MkEnv _ o) Coinbase k = k o state
 
 Handler EtherRules IO where
   handle state@(MkEth v _ _ _) Value           k = k v   state
