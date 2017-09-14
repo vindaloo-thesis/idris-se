@@ -3,6 +3,7 @@ module Main where
 import Idris.Core.TT
 import Idris.AbsSyntax
 import Idris.ElabDecls
+import Idris.Main
 import Idris.REPL
 
 import IRTS.Compiler
@@ -36,7 +37,7 @@ c_main opts = do elabPrims
                  mainProg <- if interface opts
                                 then liftM Just elabMain
                                 else return Nothing
-                 ir <- compile (Via "c") (output opts) mainProg
+                 ir <- compile (Via IBCFormat "c") (output opts) mainProg
                  runIO $ codegenSe ir
 
 main :: IO ()
